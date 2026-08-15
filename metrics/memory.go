@@ -1,13 +1,10 @@
-package main
+package metrics
 
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 	"log"
 
-	"github.com/docker/docker/api/types/container"
-	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 )
 
@@ -19,19 +16,15 @@ type DockerMemoryStats struct {
 	} `json:"memory_stats"`
 }
 
-func getTotalClusterMemory() (float64, error) {
-	f := filters.NewArgs()
-	f.Add("label", "role=worker") //to identify if the docker node is created by this application
+func GetTotalClusterMemory() (float64, error) {
 	ctx := context.Background()   // control signal, if data does not come after x second, sever the connection, prevents the infinite loop if docker crashes and no replies come
-	//cli is the object used to talk to docker.
-	// fromEnv looks at local linux variables
-	// can work with any api version
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
-	defer cli.Close() //good practice to close
+	
+	cli, containers, err := getWorkerContainers(ctx)
 	if err != nil {
-		return 0, fmt.Errorf("failed to list containers: %w", err)
+		return 0, err
 	}
-	containers, err := cli.ContainerList(ctx, container.ListOptions{All: false, Filters: f}) //gets all the container from local environment in a list that are running (all:false) and filters he node made by master node
+	defer cli.Close() //good practice to close
+
 	var totalClusterMemory float64 = 0.0                                                     // total percentage
 	for _, val := range containers {
 		memPercent, err := fetchContainerMemory(ctx, cli, val.ID)
@@ -49,10 +42,10 @@ func getTotalClusterMemory() (float64, error) {
 
 func fetchContainerMemory(ctx context.Context, cli *client.Client, containerID string) (float64, error) {
 	stats, err := cli.ContainerStats(ctx, containerID, false) // gets all the stats and then close using false
-	defer stats.Body.Close()
 	if err != nil {
 		return 0, err
 	}
+	defer stats.Body.Close()
 
 	var v DockerMemoryStats
 	err = json.NewDecoder(stats.Body).Decode(&v)
