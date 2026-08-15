@@ -17,15 +17,15 @@ type DockerMemoryStats struct {
 }
 
 func GetTotalClusterMemory() (float64, error) {
-	ctx := context.Background()   // control signal, if data does not come after x second, sever the connection, prevents the infinite loop if docker crashes and no replies come
-	
+	ctx := context.Background() // control signal, if data does not come after x second, sever the connection, prevents the infinite loop if docker crashes and no replies come
+
 	cli, containers, err := getWorkerContainers(ctx)
 	if err != nil {
 		return 0, err
 	}
 	defer cli.Close() //good practice to close
 
-	var totalClusterMemory float64 = 0.0                                                     // total percentage
+	var totalClusterMemory float64 = 0.0 // total percentage
 	for _, val := range containers {
 		memPercent, err := fetchContainerMemory(ctx, cli, val.ID)
 		if err != nil {

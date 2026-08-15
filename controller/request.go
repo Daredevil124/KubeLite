@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func RPSCalculator(w http.ResponseWriter, r *http.Request) {
+func Request(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")            //allow http request from any origin
 	w.Header().Set("Access-Control-Allow-Method", "POST-OPTIONS") //allow post method
 	if r.Method == "OPTIONS" {
