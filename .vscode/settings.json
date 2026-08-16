@@ -1,0 +1,13 @@
+{
+    "go.goroot": "/usr/local/go",
+    "go.gopath": "/home/pranel/go",
+    "gopls": {
+        "build.directoryFilters": ["-**/vendor"],
+        "ui.semanticTokens": true,
+        "build.standaloneTags": [],
+        "build.env": {
+            "GOMODCACHE": "/home/pranel/go/pkg/mod",
+            "GOPATH": "/home/pranel/go"
+        }
+    }
+}
