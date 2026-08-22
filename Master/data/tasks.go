@@ -8,7 +8,7 @@ import (
 )
 
 // would be used by worker node
-func incrementTask() {
+func IncrementTask() {
 	ctx := context.Background()
 	err := RedisClient.Incr(ctx, "task_completed").Err() //variable name task_Completed get incremented by 1
 	if err != nil {
@@ -17,7 +17,7 @@ func incrementTask() {
 }
 
 // would be used my master node
-func getTotal_Task() (int64, error) {
+func GetTotal_Task() (int64, error) {
 	ctx := context.Background()
 	completed_task, err := RedisClient.Get(ctx, "task_completed").Int64() //completed task holds all the task completed by all workers
 	if err == redis.Nil {

@@ -9,6 +9,8 @@
 *.test
 *.out
 orchestrator  # Add the specific name of your compiled Go binary here!
+Worker/Worker # Compiled binary for the Worker node
+Master/Master # Compiled binary for the Master node
 
 # 2. Dependency Folders
 # Go handles dependencies via go.mod. If you use the 'vendor' command,
