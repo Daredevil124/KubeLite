@@ -30,3 +30,14 @@ func getWorkerContainers(ctx context.Context) (*client.Client, []container.Summa
 
 	return cli, containers, nil
 }
+
+// GetWorkerCount returns how many containers with label role=worker are currently running.
+func GetWorkerCount() (int, error) {
+	ctx := context.Background()
+	cli, containers, err := getWorkerContainers(ctx)
+	if err != nil {
+		return 0, err
+	}
+	defer cli.Close()
+	return len(containers), nil
+}

@@ -1,11 +1,20 @@
 package main
 
 import (
+	"KubeLite/controller"
 	"KubeLite/data"
 	"KubeLite/orchestrator"
+	"log"
+	"net/http"
 )
 
 func main() {
 	data.InitRedis()
-	go orchestrator.Orchestrate() //one thread that goes to call the orchestrator
+	go orchestrator.Orchestrate() // background: collect metrics every 10s
+
+	http.HandleFunc("/request", controller.Request)     // POST — submit a task
+	http.HandleFunc("/metrics", controller.GetMetrics)  // GET  — live cluster stats
+
+	log.Println("Master Node listening on :8080")
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
