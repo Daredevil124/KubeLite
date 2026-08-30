@@ -9,7 +9,7 @@ import (
 	"github.com/docker/docker/client"
 )
 
-func getWorkerContainers(ctx context.Context) (*client.Client, []container.Summary, error) {
+func GetWorkerContainers(ctx context.Context) (*client.Client, []container.Summary, error) {
 	f := filters.NewArgs()
 	f.Add("label", "role=worker") //to identify if the docker node is created by this application
 

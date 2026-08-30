@@ -3,11 +3,13 @@ package orchestrator
 import (
 	"KubeLite/data"
 	"KubeLite/metrics"
+	"context"
 	"log"
 	"time"
 )
 
 func Orchestrate() {
+	ctx := context.Background()
 	ticker := time.NewTicker(10 * time.Second) //background process that pushes a timestamp in ticker.C pipe every 10 seconds
 	defer ticker.Stop()
 	var noOfContainer int64
@@ -46,5 +48,19 @@ func Orchestrate() {
 
 		_ = noOfContainer // avoid declared and not used compiler error
 		log.Printf("Metrics - CPU: %.2f%%, Memory: %.2f%%, Queue: %d, RPS: %.2f, TPS: %.2f", cpuUsage, memoryUsage, queueLength, rps, tps)
+		_, currentWorkers, err := metrics.GetWorkerContainers(ctx)
+		if err != nil {
+			log.Printf("Error fetching worker containers: %v", err)
+			continue
+		}
+		
+		if len(currentWorkers) <= int(noOfContainer) {
+			reqContainers := int(noOfContainer) - len(currentWorkers)
+			Generate(int64(reqContainers))
+		} else {
+			reqContianers := len(currentWorkers) - int(noOfContainer)
+			Destroy(int64(reqContianers))
+		}
+
 	}
 }

@@ -3,6 +3,7 @@ package metrics
 import (
 	"context"
 	"encoding/json"
+	"io"
 	"log"
 
 	"github.com/docker/docker/client"
@@ -11,7 +12,8 @@ import (
 type DockerStats struct {
 	CPUStats struct {
 		CPUUsage struct {
-			TotalUsage uint64 `json:"total_usage"`
+			TotalUsage  uint64   `json:"total_usage"`
+			PerCPUUsage []uint64 `json:"percpu_usage"`
 		} `json:"cpu_usage"`
 		SystemCPUUsage uint64 `json:"system_cpu_usage"`
 		OnlineCPUs     uint64 `json:"online_cpus"`
@@ -27,7 +29,7 @@ type DockerStats struct {
 func GetTotalClusterCPU() (float64, error) {
 	ctx := context.Background() // control signal, if data does not come after x second, sever the connection, prevents the infinite loop if docker crashes and no replies come
 
-	cli, containers, err := getWorkerContainers(ctx)
+	cli, containers, err := GetWorkerContainers(ctx)
 	if err != nil {
 		return 0, err
 	}
@@ -67,4 +69,21 @@ func fetchContainerCPU(ctx context.Context, cli *client.Client, containerID stri
 		return (cpuDelta / systemDelta) * onlineCPUs * 100.0, nil
 	}
 	return 0.0, nil
+}
+func IsCpuIdle(body io.Reader) bool {
+	var v DockerStats
+	if err := json.NewDecoder(body).Decode(&v); err != nil {
+		return false
+	}
+	cpuDelta := float64(v.CPUStats.CPUUsage.TotalUsage - v.PreCPUStats.CPUUsage.TotalUsage)
+	systemDelta := float64(v.CPUStats.SystemCPUUsage - v.PreCPUStats.SystemCPUUsage)
+	if systemDelta > 0.0 && cpuDelta > 0.0 {
+		onlineCPUs := float64(v.CPUStats.OnlineCPUs)
+		if onlineCPUs == 0.0 {
+			onlineCPUs = float64(len(v.CPUStats.CPUUsage.PerCPUUsage))
+		}
+		cpuPercent := (cpuDelta / systemDelta) * onlineCPUs * 100.0
+		return cpuPercent < 0.1
+	}
+	return true
 }

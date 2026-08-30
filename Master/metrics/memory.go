@@ -19,7 +19,7 @@ type DockerMemoryStats struct {
 func GetTotalClusterMemory() (float64, error) {
 	ctx := context.Background() // control signal, if data does not come after x second, sever the connection, prevents the infinite loop if docker crashes and no replies come
 
-	cli, containers, err := getWorkerContainers(ctx)
+	cli, containers, err := GetWorkerContainers(ctx)
 	if err != nil {
 		return 0, err
 	}
