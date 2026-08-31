@@ -71,6 +71,8 @@ func sendRequest(client *http.Client) bool {
 	// Generate probabilistic task selection (Gaussian distribution)
 	task := generateProbabilisticTask()
 
+	fmt.Printf(" [CPU Task Sent] Type: %-15s | Value: %-6d\n", task.Type, task.Value)
+
 	// underscore here is basically containing error but since we dont use error here, to avoid unnecessary syntax problem we use _
 	payload, err := json.Marshal(task) //json.Marshal takes a Go struct and converts ("marshals") it into a JSON byte array ([]byte)
 
