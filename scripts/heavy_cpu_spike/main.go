@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"math/rand"
 	"net/http"
 	"sync"
 	"sync/atomic"
@@ -16,17 +17,61 @@ const (
 	concurrency = 10
 )
 
+// TaskPayload represents the JSON sent to Master node
 type TaskPayload struct {
 	Type  string `json:"type"`
 	Value int    `json:"value"`
 }
 
-func sendHeavyRequest(client *http.Client) bool {
-	// underscore here is basically containing error but since we dont use error here, to avoid unnecessary syntax problem we use _
-	payload, _ := json.Marshal(TaskPayload{ //json.Marshal takes a Go struct and converts ("marshals") it into a JSON byte array ([]byte)
-		Type:  "prime",
-		Value: 100000,
-	})
+// Counter tracking generated task types
+var (
+	primeTaskCount     uint64
+	stressCPUTaskCount uint64
+	powerOfTwoCount    uint64
+)
+
+// generateProbabilisticTask uses Gaussian (Normal) distribution sampling
+// centered at mean = 0.8, stddev = 0.15 to probabilistically choose between
+// heavy tasks (prime / stress_cpu) and light tasks (is_power_of_two).
+func generateProbabilisticTask() TaskPayload {
+	// Gaussian sample centered at 0.8
+	sample := rand.NormFloat64()*0.15 + 0.8
+
+	if sample >= 0.4 {
+		// Heavy CPU Workload (80-90% probability)
+		if rand.Float64() < 0.6 {
+			atomic.AddUint64(&primeTaskCount, 1)
+			return TaskPayload{
+				Type:  "prime",
+				Value: 80000 + rand.Intn(40000), // Find 80,000th to 120,000th prime
+			}
+		} else {
+			atomic.AddUint64(&stressCPUTaskCount, 1)
+			return TaskPayload{
+				Type:  "stress_cpu",
+				Value: 5 + rand.Intn(10), // Burn CPU for 5-15 seconds
+			}
+		}
+	} else {
+		// Light CPU Workload (10-20% probability)
+		atomic.AddUint64(&powerOfTwoCount, 1)
+		return TaskPayload{
+			Type:  "is_power_of_two",
+			Value: 1024 + rand.Intn(10000),
+		}
+	}
+}
+
+func sendRequest(client *http.Client) bool {
+	// Generate probabilistic task selection (Gaussian distribution)
+	task := generateProbabilisticTask()
+
+	payload, err := json.Marshal(task) //json.Marshal takes a Go struct and converts ("marshals") it into a JSON byte array ([]byte)
+
+	if err != nil {
+		return false
+	}
+
 	// Input: TaskPayload{Type: "prime", Value: 100000}
 	// Output: []byte('{"type":"prime","value":100000}')
 
@@ -49,8 +94,10 @@ func sendHeavyRequest(client *http.Client) bool {
 }
 
 func main() {
-	fmt.Println("[Heavy-Heavy] Starting CPU Spike Load Test in Go...")
-	fmt.Printf("Sending %d heavy tasks across %d parallel goroutines to %s...\n\n", numRequests, concurrency, masterURL)
+	rand.Seed(time.Now().UnixNano()) // Seed pseudo-random generator
+
+	fmt.Println("[Heavy-Heavy] Starting Probabilistic CPU Spike Load Test in Go...")
+	fmt.Printf("Sending %d tasks using Gaussian probability distribution (concurrency=%d)...\n\n", numRequests, concurrency)
 
 	client := &http.Client{Timeout: 5 * time.Second}
 	startTime := time.Now()
@@ -61,11 +108,11 @@ func main() {
 
 	for i := 0; i < numRequests; i++ {
 		wg.Add(1)               // add 1 to the wait group, we will keep on adding it until it reaches 100
-		semaphore <- struct{}{} //The for loop pauses and will NOT execute go func() for request #11 yet.
+		semaphore <- struct{}{} // Pause loop if 10 concurrent requests are running
 		go func() {
 			defer wg.Done()                // Done decrements the wait group, "1 task finished, 99 remaining"
-			defer func() { <-semaphore }() // this increments the semaphore value by 1, meaning the task is completed.
-			if sendHeavyRequest(client) {
+			defer func() { <-semaphore }() // Release semaphore slot when task finishes
+			if sendRequest(client) {
 				atomic.AddUint64(&successCount, 1)
 			}
 		}()
@@ -75,6 +122,10 @@ func main() {
 	elapsed := time.Since(startTime).Seconds()
 
 	fmt.Printf("\n[Heavy-Heavy Test Completed in %.2fs]\n", elapsed)
-	fmt.Printf("Successfully queued %d/%d heavy CPU tasks.\n", successCount, numRequests)
-	fmt.Println("Check Master logs/dashboard: Worker CPU usage should be ~100%, triggering scale-up!")
+	fmt.Printf("Successfully queued %d/%d tasks.\n", successCount, numRequests)
+	fmt.Println("\n📊 Task Probability Distribution Generated:")
+	fmt.Printf("  • Prime Calculations (Heavy):     %d tasks\n", atomic.LoadUint64(&primeTaskCount))
+	fmt.Printf("  • Multi-Core Stress (Heavy):     %d tasks\n", atomic.LoadUint64(&stressCPUTaskCount))
+	fmt.Printf("  • Power Of Two Checks (Light):    %d tasks\n", atomic.LoadUint64(&powerOfTwoCount))
+	fmt.Println("\nCheck Master logs/dashboard: Worker CPU usage should peg near ~100%, triggering scale-up!")
 }
