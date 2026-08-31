@@ -43,7 +43,7 @@ func Destroy(noOfContainer int64) {
 			continue
 		}
 		defer stats.Body.Close()
-		timeout := 30
+		timeout := 30 // time out for 30 seconds before sigkill is sent for workers that are doing tasks
 		cli.ContainerStop(ctx, c.ID, container.StopOptions{Timeout: &timeout})
 		cli.ContainerRemove(ctx, c.ID, container.RemoveOptions{Force: true})
 		cnt++
