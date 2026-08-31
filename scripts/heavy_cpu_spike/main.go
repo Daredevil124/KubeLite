@@ -123,9 +123,11 @@ func main() {
 
 	fmt.Printf("\n[Heavy-Heavy Test Completed in %.2fs]\n", elapsed)
 	fmt.Printf("Successfully queued %d/%d tasks.\n", successCount, numRequests)
-	fmt.Println("\n📊 Task Probability Distribution Generated:")
+	fmt.Println("\n Task Probability Distribution Generated:")
 	fmt.Printf("  • Prime Calculations (Heavy):     %d tasks\n", atomic.LoadUint64(&primeTaskCount))
 	fmt.Printf("  • Multi-Core Stress (Heavy):     %d tasks\n", atomic.LoadUint64(&stressCPUTaskCount))
 	fmt.Printf("  • Power Of Two Checks (Light):    %d tasks\n", atomic.LoadUint64(&powerOfTwoCount))
 	fmt.Println("\nCheck Master logs/dashboard: Worker CPU usage should peg near ~100%, triggering scale-up!")
 }
+
+//Note :  Key Takeaway: Gaussian determines what task to create, while Poisson determines when to send it!
