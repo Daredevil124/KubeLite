@@ -12,7 +12,7 @@ func Destroy(noOfContainer int64) {
 	ctx := context.Background()
 	cli, containers, err := metrics.GetWorkerContainers(ctx) //gets all the containers
 	if err != nil {
-		log.Printf("failed to create docker client &v:", err)
+		log.Printf("failed to create docker client: %v", err)
 		return
 	}
 	cnt := 0

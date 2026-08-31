@@ -15,7 +15,7 @@ func Generate(noOfContainers int64) {
 	ctx := context.Background()
 	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
-		log.Printf("failed to create docker client: %w", err)
+		log.Printf("failed to create docker client: %v", err)
 		return
 	}
 	defer cli.Close()
