@@ -1,11 +1,11 @@
 # Build stage
-FROM golang:1.23-alpine AS builder
+FROM golang:1.24-alpine AS builder
 
 WORKDIR /app
 
 # Copy the module files and download dependencies
-COPY go.mod ./
-# RUN go mod download
+COPY go.mod go.sum ./
+RUN go mod download
 
 # Copy all the Go source files
 COPY *.go ./
