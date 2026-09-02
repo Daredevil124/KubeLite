@@ -1,0 +1,62 @@
+/* ── Global reset & design tokens ── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  /* Warm dark palette — deliberately NOT cold blue/purple */
+  --bg:          #0c0a09;
+  --surface:     #141210;
+  --surface-2:   #1c1917;
+  --border:      #27231f;
+  --border-hi:   #3d3832;
+
+  /* One accent — deep orange */
+  --accent:      #ea580c;
+  --accent-2:    rgba(234, 88, 12, 0.1);
+
+  /* Semantic */
+  --green:       #16a34a;
+  --green-2:     rgba(22, 163, 74, 0.08);
+  --red:         #dc2626;
+  --red-2:       rgba(220, 38, 38, 0.08);
+  --amber:       #d97706;
+  --amber-2:     rgba(217, 119, 6, 0.08);
+
+  /* Text */
+  --t1: #fafaf9;
+  --t2: #a8a29e;
+  --t3: #57534e;
+
+  --mono: 'JetBrains Mono', monospace;
+  --sans: 'Inter', sans-serif;
+
+  --radius: 10px;
+}
+
+html { font-size: 14px; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--t1);
+  min-height: 100vh;
+  -webkit-font-smoothing: antialiased;
+}
+
+button { font-family: var(--sans); cursor: pointer; }
+
+/* Shared card */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+/* Monospace numbers */
+.mono { font-family: var(--mono); }
+
+/* Thin scrollbar */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-hi); border-radius: 2px; }

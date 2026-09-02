@@ -1,0 +1,97 @@
+.panel {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  color: var(--t2);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  background: var(--bg, transparent);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--t1);
+  text-align: left;
+  width: 100%;
+  transition: border-color 0.18s, background 0.18s, transform 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:not(:disabled):hover {
+  border-color: var(--c);
+  background: var(--bg);
+  transform: translateX(3px);
+}
+
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.btnEmoji {
+  font-size: 18px;
+  color: var(--c);
+  flex-shrink: 0;
+  width: 24px;
+  text-align: center;
+}
+
+.btnText {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.btnTitle {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--c);
+}
+
+.btnDesc {
+  font-size: 11px;
+  font-family: var(--mono);
+  color: var(--t3);
+}
+
+.btnArrow {
+  font-size: 14px;
+  color: var(--t3);
+  transition: color 0.18s, transform 0.15s;
+}
+
+.btn:not(:disabled):hover .btnArrow {
+  color: var(--c);
+  transform: translateX(2px);
+}
+
+.hint {
+  font-size: 11px;
+  color: var(--t3);
+  line-height: 1.7;
+  padding-top: 4px;
+  border-top: 1px solid var(--border);
+}
+
+.hint code {
+  font-family: var(--mono);
+  color: var(--accent);
+  font-size: 10.5px;
+}
