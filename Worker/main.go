@@ -5,6 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"os/signal"
+	"sync/atomic"
+	"syscall"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -42,7 +45,20 @@ func main() {
 	fmt.Println("Worker Node Starting...")
 
 	rdb = InitRedisClient() // the returned client pointer is stored in the rdb variable
-	ctx := context.Background()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	// Graceful shutdown: listen for SIGTERM (sent by Master via ContainerStop).
+	// The signal goroutine sets the flag and cancels ctx to unblock BLPop immediately.
+	var isShuttingDown atomic.Bool
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, syscall.SIGTERM, os.Interrupt)
+	go func() {
+		<-sigCh
+		fmt.Println("Worker: SIGTERM received — finishing current task then exiting cleanly...")
+		isShuttingDown.Store(true)
+		cancel() // unblocks the BLPop call
+	}()
 
 	// Verify Redis connectivity
 	pong, err := rdb.Ping(ctx).Result()
@@ -58,6 +74,14 @@ func main() {
 		// BLPop blocks until an element is available. A timeout of 0 means block indefinitely.
 		// This allows the worker to consume 0% CPU while sitting idle.
 		result, err := rdb.BLPop(ctx, 0, "task_queue").Result()
+
+		// If the shutdown flag is set, BLPop was unblocked by ctx cancellation.
+		// The current task (if any) already finished before we reach here, so exit cleanly.
+		if isShuttingDown.Load() {
+			fmt.Println("Worker: shutdown complete — exiting.")
+			os.Exit(0)
+		}
+
 		if err != nil {
 			fmt.Printf("Error retrieving task from queue: %v\n", err)
 			continue
@@ -79,13 +103,16 @@ func main() {
 		case "prime":
 			res := FindNthPrime(task.Value)
 			fmt.Printf("Result of FindNthPrime(%d) = %d\n", task.Value, res)
+			rdb.Incr(ctx, "task_completed")
 		case "is_power_of_two":
 			res := IsPowerOfTwo(task.Value)
 			fmt.Printf("Result of IsPowerOfTwo(%d) = %v\n", task.Value, res)
+			rdb.Incr(ctx, "task_completed")
 		case "stress_cpu":
 			fmt.Printf("Starting CPU stress test for %d seconds...\n", task.Value)
 			StressCPUAllCores(task.Value)
 			fmt.Println("CPU stress test completed.")
+			rdb.Incr(ctx, "task_completed")
 		default:
 			fmt.Printf("Unknown task type received: %s\n", task.Type)
 		}
