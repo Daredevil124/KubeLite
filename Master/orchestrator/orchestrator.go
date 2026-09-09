@@ -17,9 +17,15 @@ func Orchestrate() {
 	var tps float64
 	oldRequest := 0
 	oldTask := 0
+	_, currentWorkers, err := metrics.GetWorkerContainers(ctx)
+	if err != nil {
+		log.Printf("Error fetching worker containers: %v", err)
+		continue
+	}
 	for { //infinite loop
 		//thread goes to sleep if there is nothing in the channel
 		<-ticker.C //thread is woken up if something is pushed into ticker.C and ticker.C runs a pop function (<- means pop())
+		Processing_to_main()
 		cpuUsage, err := metrics.GetTotalClusterCPU()
 		if err != nil {
 			log.Printf("Error fetching cpu data: %v", err)
@@ -48,12 +54,7 @@ func Orchestrate() {
 
 		_ = noOfContainer // avoid declared and not used compiler error
 		log.Printf("Metrics - CPU: %.2f%%, Memory: %.2f%%, Queue: %d, RPS: %.2f, TPS: %.2f", cpuUsage, memoryUsage, queueLength, rps, tps)
-		_, currentWorkers, err := metrics.GetWorkerContainers(ctx)
-		if err != nil {
-			log.Printf("Error fetching worker containers: %v", err)
-			continue
-		}
-		
+
 		if len(currentWorkers) <= int(noOfContainer) {
 			reqContainers := int(noOfContainer) - len(currentWorkers)
 			Generate(int64(reqContainers))
