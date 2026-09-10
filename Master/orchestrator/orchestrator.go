@@ -17,15 +17,15 @@ func Orchestrate() {
 	var tps float64
 	oldRequest := 0
 	oldTask := 0
-	_, currentWorkers, err := metrics.GetWorkerContainers(ctx)
-	if err != nil {
-		log.Printf("Error fetching worker containers: %v", err)
-		continue
-	}
 	for { //infinite loop
 		//thread goes to sleep if there is nothing in the channel
 		<-ticker.C //thread is woken up if something is pushed into ticker.C and ticker.C runs a pop function (<- means pop())
-		Processing_to_main()
+		_, currentWorkers, err := metrics.GetWorkerContainers(ctx)
+		if err != nil {
+			log.Printf("Error fetching worker containers: %v", err)
+			continue
+		}
+		Processing_to_main(currentWorkers)
 		cpuUsage, err := metrics.GetTotalClusterCPU()
 		if err != nil {
 			log.Printf("Error fetching cpu data: %v", err)

@@ -71,11 +71,12 @@ func main() {
 	fmt.Println("Worker is now waiting for tasks on 'task_queue'...")
 	
 	for {
-		// BLPop blocks until an element is available. A timeout of 0 means block indefinitely.
-		// This allows the worker to consume 0% CPU while sitting idle.
-		result, err := rdb.BLPop(ctx, 0, "task_queue").Result()
+		// BLMove atomically pops an element from 'task_queue' and pushes it to 'processing_queue'.
+		// 0 timeout means it blocks indefinitely, consuming 0% CPU while idle.
+		// "LEFT" means we pop from the front of the line, "RIGHT" means we add it to the back of the processing queue.
+		payload, err := rdb.BLMove(ctx, "task_queue", "processing_queue", "LEFT", "RIGHT", 0).Result()
 
-		// If the shutdown flag is set, BLPop was unblocked by ctx cancellation.
+		// If the shutdown flag is set, BLMove was unblocked by ctx cancellation.
 		// The current task (if any) already finished before we reach here, so exit cleanly.
 		if isShuttingDown.Load() {
 			fmt.Println("Worker: shutdown complete — exiting.")
@@ -87,10 +88,7 @@ func main() {
 			continue
 		}
 
-		// result[0] is the queue name ("task_queue")
-		// result[1] is the actual task payload
-		payload := result[1]
-		fmt.Printf("Received task payload: %s\n", payload)
+		fmt.Printf("Received task payload and safely moved to processing_queue: %s\n", payload)
 		
 		var task TaskPayload
 		err = json.Unmarshal([]byte(payload), &task)
