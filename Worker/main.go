@@ -114,5 +114,10 @@ func main() {
 		default:
 			fmt.Printf("Unknown task type received: %s\n", task.Type)
 		}
+
+		// Task finished — remove it from processing_queue so the Master's
+		// recovery loop doesn't mistake it for a crashed-worker task and re-queue it.
+		// LREM count=1 removes the first (and only) occurrence of this exact payload.
+		rdb.LRem(ctx, "processing_queue", 1, payload)
 	}
 }
