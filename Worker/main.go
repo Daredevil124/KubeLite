@@ -76,24 +76,36 @@ func main() {
 		// "LEFT" means we pop from the front of the line, "RIGHT" means we add it to the back of the processing queue.
 		payload, err := rdb.BLMove(ctx, "task_queue", "processing_queue", "LEFT", "RIGHT", 0).Result()
 
-		// If the shutdown flag is set, BLMove was unblocked by ctx cancellation.
-		// The current task (if any) already finished before we reach here, so exit cleanly.
-		if isShuttingDown.Load() {
+		// If the shutdown flag is set and BLMove returned an error (e.g. context canceled while idle), exit cleanly.
+		if isShuttingDown.Load() && err != nil {
 			fmt.Println("Worker: shutdown complete — exiting.")
 			os.Exit(0)
 		}
 
 		if err != nil {
+			if isShuttingDown.Load() {
+				fmt.Println("Worker: shutdown complete — exiting.")
+				os.Exit(0)
+			}
 			fmt.Printf("Error retrieving task from queue: %v\n", err)
 			continue
 		}
 
 		fmt.Printf("Received task payload and safely moved to processing_queue: %s\n", payload)
-		
+
+		// Independent context for cleanup operations so Redis commands (Incr, LRem)
+		// succeed even if 'ctx' was canceled by a SIGTERM received during task execution.
+		cleanupCtx := context.Background()
+
 		var task TaskPayload
 		err = json.Unmarshal([]byte(payload), &task)
 		if err != nil {
-			fmt.Printf("Failed to parse JSON: %v\n", err)
+			fmt.Printf("Corrupted JSON payload received from queue: %v. Removing from processing_queue and skipping.\n", err)
+			rdb.LRem(cleanupCtx, "processing_queue", 1, payload)
+			if isShuttingDown.Load() {
+				fmt.Println("Worker: shutdown complete — exiting.")
+				os.Exit(0)
+			}
 			continue
 		}
 
@@ -101,16 +113,16 @@ func main() {
 		case "prime":
 			res := FindNthPrime(task.Value)
 			fmt.Printf("Result of FindNthPrime(%d) = %d\n", task.Value, res)
-			rdb.Incr(ctx, "task_completed")
+			rdb.Incr(cleanupCtx, "task_completed")
 		case "is_power_of_two":
 			res := IsPowerOfTwo(task.Value)
 			fmt.Printf("Result of IsPowerOfTwo(%d) = %v\n", task.Value, res)
-			rdb.Incr(ctx, "task_completed")
+			rdb.Incr(cleanupCtx, "task_completed")
 		case "stress_cpu":
 			fmt.Printf("Starting CPU stress test for %d seconds...\n", task.Value)
 			StressCPUAllCores(task.Value)
 			fmt.Println("CPU stress test completed.")
-			rdb.Incr(ctx, "task_completed")
+			rdb.Incr(cleanupCtx, "task_completed")
 		default:
 			fmt.Printf("Unknown task type received: %s\n", task.Type)
 		}
@@ -118,6 +130,12 @@ func main() {
 		// Task finished — remove it from processing_queue so the Master's
 		// recovery loop doesn't mistake it for a crashed-worker task and re-queue it.
 		// LREM count=1 removes the first (and only) occurrence of this exact payload.
-		rdb.LRem(ctx, "processing_queue", 1, payload)
+		rdb.LRem(cleanupCtx, "processing_queue", 1, payload)
+
+		// If SIGTERM was received during task processing, exit cleanly now after cleanup.
+		if isShuttingDown.Load() {
+			fmt.Println("Worker: finished processing current task after SIGTERM — exiting cleanly.")
+			os.Exit(0)
+		}
 	}
 }
