@@ -20,7 +20,7 @@ func Orchestrate() {
 	for { //infinite loop
 		//thread goes to sleep if there is nothing in the channel
 		<-ticker.C //thread is woken up if something is pushed into ticker.C and ticker.C runs a pop function (<- means pop())
-		_, currentWorkers, err := metrics.GetWorkerContainers(ctx)
+		cli, currentWorkers, err := metrics.GetWorkerContainers(ctx)
 		if err != nil {
 			log.Printf("Error fetching worker containers: %v", err)
 			continue
@@ -41,7 +41,7 @@ func Orchestrate() {
 			log.Printf("Error fetching queue length: %v", err)
 			continue
 		}
-		request := data.GetRequestCount()
+		request, _ := data.GetRequestCount()
 		tasks, err := data.GetTotal_Task()
 		if err != nil {
 			log.Printf("Error fetching tasks: %v", err)
@@ -62,6 +62,7 @@ func Orchestrate() {
 			reqContianers := len(currentWorkers) - int(noOfContainer)
 			Destroy(int64(reqContianers))
 		}
+		cli.Close()
 
 	}
 }

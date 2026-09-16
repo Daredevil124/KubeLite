@@ -31,12 +31,12 @@ func GetMetrics(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	cpu, _         := metrics.GetTotalClusterCPU()
-	memory, _      := metrics.GetTotalClusterMemory()
-	queue, _       := metrics.GetQueueLength()
+	cpu, _ := metrics.GetTotalClusterCPU()
+	memory, _ := metrics.GetTotalClusterMemory()
+	queue, _ := metrics.GetQueueLength()
 	workerCount, _ := metrics.GetWorkerCount()
-	requests       := data.GetRequestCount()
-	tasks, _       := data.GetTotal_Task()
+	requests, _ := data.GetRequestCount()
+	tasks, _ := data.GetTotal_Task()
 
 	resp := MetricsResponse{
 		CPUPercent:    cpu,

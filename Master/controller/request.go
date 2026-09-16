@@ -8,8 +8,10 @@ import (
 )
 
 func Request(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Access-Control-Allow-Origin", "*")            //allow http request from any origin
-	w.Header().Set("Access-Control-Allow-Method", "POST-OPTIONS") //allow post method
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+	w.Header().Set("Content-Type", "application/json")
 	if r.Method == "OPTIONS" {
 		w.WriteHeader(http.StatusOK)
 		return
@@ -27,5 +29,5 @@ func Request(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(http.StatusAccepted)
-	w.Write([]byte(`{"status:queued successfully"}`))
+	w.Write([]byte(`{"status":"queued successfully"}`))
 }
