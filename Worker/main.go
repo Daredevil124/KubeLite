@@ -1,6 +1,7 @@
 package main
 
 import (
+	"Worker/tasks"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -111,16 +112,16 @@ func main() {
 
 		switch task.Type {
 		case "prime":
-			res := FindNthPrime(task.Value)
+			res := tasks.FindNthPrime(task.Value)
 			fmt.Printf("Result of FindNthPrime(%d) = %d\n", task.Value, res)
 			rdb.Incr(cleanupCtx, "task_completed")
 		case "is_power_of_two":
-			res := IsPowerOfTwo(task.Value)
+			res := tasks.IsPowerOfTwo(task.Value)
 			fmt.Printf("Result of IsPowerOfTwo(%d) = %v\n", task.Value, res)
 			rdb.Incr(cleanupCtx, "task_completed")
 		case "stress_cpu":
 			fmt.Printf("Starting CPU stress test for %d seconds...\n", task.Value)
-			StressCPUAllCores(task.Value)
+			tasks.StressCPUAllCores(task.Value)
 			fmt.Println("CPU stress test completed.")
 			rdb.Incr(cleanupCtx, "task_completed")
 		default:

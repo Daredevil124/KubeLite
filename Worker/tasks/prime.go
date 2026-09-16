@@ -1,4 +1,4 @@
-package main
+package tasks
 
 // FindNthPrime calculates the N-th prime number using CPU-heavy trial division.
 // Brute Force method is chosen intentionally to purely stress test the CPU.
