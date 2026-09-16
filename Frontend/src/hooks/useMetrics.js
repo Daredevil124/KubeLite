@@ -41,10 +41,10 @@ export function useMetrics() {
 
 export async function submitTask(type) {
   const payload = type === 'light'
-    ? { type: 'light', n: 50000 }
-    : { type: 'heavy', duration: 30 }
+    ? { type: 'prime', value: 50000 }
+    : { type: 'stress_cpu', value: 30 }
 
-  const res = await fetch(`${API}/request`, {
+  const res = await fetch(`${API}/evaluate`, {
     method:  'POST',
     headers: { 'Content-Type': 'application/json' },
     body:    JSON.stringify(payload),

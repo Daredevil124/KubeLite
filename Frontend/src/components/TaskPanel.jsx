@@ -64,7 +64,7 @@ export default function TaskPanel({ onLog }) {
 
       <p className={styles.hint}>
         Tasks are pushed to <code>task_queue</code> in Redis via{' '}
-        <code>POST /request</code>. Workers pull and execute them.
+        <code>POST /evaluate</code>. Workers pull and execute them.
       </p>
     </div>
   )

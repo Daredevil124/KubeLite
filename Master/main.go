@@ -12,7 +12,8 @@ func main() {
 	data.InitRedis()
 	go orchestrator.Orchestrate() // background: collect metrics every 10s
 
-	http.HandleFunc("/request", controller.Request)     // POST — submit a task
+	http.HandleFunc("/evaluate", controller.Request)    // POST — evaluate workload (Architecture spec)
+	http.HandleFunc("/request", controller.Request)     // POST — submit a task (alias)
 	http.HandleFunc("/metrics", controller.GetMetrics)  // GET  — live cluster stats
 
 	log.Println("Master Node listening on :8080")
