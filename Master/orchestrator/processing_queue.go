@@ -41,13 +41,7 @@ func Processing_to_main(currentWorkers []container.Summary) {
 		if mp[task.First] { //checking if the ID exists in the current Worker nodes
 			data.RedisClient.RPush(ctx, "temp_queue", rawTask) //pushing into a temporary queue
 		} else {
-			task.First = ""                      //emptying the ID
-			cleanJSON, err := json.Marshal(task) //marshalling back
-			if err != nil {
-				log.Printf("Failed to marshal sanitized task: %v", err)
-				continue
-			}
-			data.RedisClient.RPush(ctx, "task_queue", cleanJSON) //If ID not present shift it to the main queue. This happens if the worker node crashes before finishing the task
+			data.RedisClient.RPush(ctx, "task_queue", task.Second) //If ID not present shift it to the main queue. This happens if the worker node crashes before finishing the task
 		}
 	}
 	for { //tranfer all the data from temporary queue to processing_queue
