@@ -11,6 +11,11 @@ import csv
 import math
 
 def generate_charts(csv_path, output_dir, formula_text):
+    if not os.path.exists(csv_path):
+        print(f"⚠️  Error: Metrics CSV file was not found at: {csv_path}")
+        print("   Please ensure Master node is running on http://localhost:8080 and that you have write permissions.")
+        return
+
     rows = []
     with open(csv_path, 'r') as f:
         reader = csv.DictReader(f)
@@ -29,7 +34,8 @@ def generate_charts(csv_path, output_dir, formula_text):
                 continue
 
     if not rows:
-        print("No data rows found in CSV.")
+        print(f"⚠️  Warning: No data rows found in CSV: {csv_path}")
+        print("   Master node was either not receiving traffic or unreachable during the benchmark.")
         return
 
     # Normalize time to start at 0

@@ -17,7 +17,13 @@ LOAD_SCRIPT="${2:-$ROOT_DIR/scripts/steady_balanced_load/main.go}"
 
 TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 RUN_DIR="$ROOT_DIR/tests/$FORMULA_NAME/run_$TIMESTAMP"
-mkdir -p "$RUN_DIR"
+if ! mkdir -p "$RUN_DIR" 2>/dev/null; then
+    echo "❌ Error: Could not create benchmark run directory: $RUN_DIR"
+    echo "   This usually happens on Linux if 'tests/' was created by root or Docker."
+    echo "   To fix permissions, run:"
+    echo "     sudo chown -R $USER:$USER \"$ROOT_DIR/tests\""
+    exit 1
+fi
 
 CSV_FILE="$RUN_DIR/metrics_log.csv"
 FORMULA_FILE="$RUN_DIR/formula_definition.txt"
@@ -58,7 +64,19 @@ echo " Workload : $LOAD_SCRIPT"
 echo "================================================================================"
 
 # Initialize CSV header
-echo "timestamp_sec,cpu_percent,memory_percent,queue_length,worker_count,total_requests,total_tasks,rps,tps" > "$CSV_FILE"
+if ! echo "timestamp_sec,cpu_percent,memory_percent,queue_length,worker_count,total_requests,total_tasks,rps,tps" > "$CSV_FILE" 2>/dev/null; then
+    echo "❌ Error: Could not initialize metrics CSV file at: $CSV_FILE"
+    echo "   Please check write permissions for: $RUN_DIR"
+    exit 1
+fi
+
+# Pre-flight check: ensure Master node is reachable
+if ! curl -s --max-time 3 http://localhost:8080/metrics >/dev/null 2>&1; then
+    echo "⚠️  WARNING: Master API (http://localhost:8080/metrics) is not responding!"
+    echo "   Please make sure KubeLite is running in another terminal via:"
+    echo "     ./scripts/start_kubelite.sh"
+    echo "--------------------------------------------------------------------------------"
+fi
 
 # Background Poller: queries Master /metrics every 2 seconds and appends to CSV
 poll_metrics() {
@@ -123,6 +141,21 @@ cleanup() {
     echo " Finishing benchmark session... Processing charts..."
     kill $POLLER_PID 2>/dev/null || true
     docker stop kubelite-workload 2>/dev/null || true
+
+    if [ ! -f "$CSV_FILE" ]; then
+        echo "⚠️  Error: Metrics CSV file was not found at: $CSV_FILE"
+        echo "    No telemetry was recorded. Make sure Master node was running on http://localhost:8080."
+        exit 1
+    fi
+
+    # Check if any telemetry data rows were collected (more than 1 line)
+    local line_count
+    line_count=$(wc -l < "$CSV_FILE" 2>/dev/null || echo 0)
+    if [ "$line_count" -le 1 ]; then
+        echo "⚠️  Warning: CSV file only contains header line (0 metrics recorded)."
+        echo "    Master node may not have responded to /metrics polling during the benchmark."
+        echo "    Check if Master node was running and healthy."
+    fi
 
     # Run Python chart visualizer
     python3 "$ROOT_DIR/scripts/generate_charts.py" "$CSV_FILE" "$RUN_DIR" "$FORMULA_NAME"

@@ -9,13 +9,25 @@ echo "=========================================================="
 echo "           ⚡ Starting KubeLite System ⚡                  "
 echo "=========================================================="
 
-echo "[1/4] Ensuring Redis is running on localhost:6379 and exposing :8080..."
-if [ -z "$(docker port kubelite-redis 8080 2>/dev/null)" ]; then
-    echo "Creating and running new kubelite-redis container with port mapping (-p 6379:6379 -p 8080:8080)..."
-    docker rm -f kubelite-redis 2>/dev/null || true
-    docker run -d --name kubelite-redis -p 6379:6379 -p 8080:8080 redis:alpine
+echo "[1/4] Ensuring Redis is running on localhost:6379..."
+if command -v go >/dev/null 2>&1; then
+    # Native host Go environment: Redis only needs port 6379; Master will bind directly to 8080
+    if [ -z "$(docker port kubelite-redis 6379 2>/dev/null)" ] || [ -n "$(docker port kubelite-redis 8080 2>/dev/null)" ]; then
+        echo "Creating and running new kubelite-redis container with port mapping (-p 6379:6379)..."
+        docker rm -f kubelite-redis 2>/dev/null || true
+        docker run -d --name kubelite-redis -p 6379:6379 redis:alpine
+    else
+        echo "kubelite-redis is already running on localhost:6379."
+    fi
 else
-    echo "kubelite-redis is already running with port mapping."
+    # Docker containerized Go environment: Redis container also exposes 8080 for Master
+    if [ -z "$(docker port kubelite-redis 8080 2>/dev/null)" ]; then
+        echo "Creating and running new kubelite-redis container with port mapping (-p 6379:6379 -p 8080:8080)..."
+        docker rm -f kubelite-redis 2>/dev/null || true
+        docker run -d --name kubelite-redis -p 6379:6379 -p 8080:8080 redis:alpine
+    else
+        echo "kubelite-redis is already running with port mapping."
+    fi
 fi
 
 echo "[2/4] Building Worker Docker image (kubelite-worker:latest)..."
@@ -23,6 +35,7 @@ cd "$ROOT_DIR/Worker"
 docker build -t kubelite-worker:latest .
 
 echo "[3/4] Starting Master Node on :8080..."
+cd "$ROOT_DIR/Master"
 if command -v go >/dev/null 2>&1; then
     go run main.go &
     MASTER_PID=$!
