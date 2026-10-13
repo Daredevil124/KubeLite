@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" width="1000" height="520" style="background:#0c0a09; font-family:'Inter',system-ui,sans-serif;">
+  <style>
+    .grid { stroke: #201d1a; stroke-width: 1; }
+    .title { font-size: 15px; font-weight: 700; fill: #fafaf9; letter-spacing: 0.5px; }
+    .sub { font-size: 11px; fill: #a8a29e; font-family: monospace; }
+    .axis { font-size: 11px; fill: #78716c; font-family: monospace; }
+    .box { fill: #141210; stroke: #3d3832; stroke-width: 1; rx: 6px; }
+  </style>
+
+  <!-- Header Box -->
+  <rect x="25" y="15" width="950" height="85" class="box" />
+  <text x="40" y="38" class="title">AUTOSCALER REPLICA MANAGEMENT: ACTIVE WORKERS</text>
+  <text x="40" y="58" class="sub">Docker worker containers spawned with label &#x27;role=worker&#x27;</text>
+  <line x1="100" y1="88" x2="120" y2="88" stroke="#22c55e" stroke-width="3.0" /><text x="128" y="92" class="axis" fill="#fafaf9">Active Worker Replicas</text>
+
+  <!-- Plot Background -->
+  <rect x="90" y="110" width="830" height="340" fill="#141210" stroke="#27231f" />
+
+  <!-- Grid & Axes -->
+  <line x1="90" y1="450.0" x2="920" y2="450.0" class="grid" /><line x1="90" y1="365.0" x2="920" y2="365.0" class="grid" /><line x1="90" y1="280.0" x2="920" y2="280.0" class="grid" /><line x1="90" y1="195.0" x2="920" y2="195.0" class="grid" /><line x1="90" y1="110.0" x2="920" y2="110.0" class="grid" /><line x1="90.0" y1="110" x2="90.0" y2="450" class="grid" /><line x1="297.5" y1="110" x2="297.5" y2="450" class="grid" /><line x1="505.0" y1="110" x2="505.0" y2="450" class="grid" /><line x1="712.5" y1="110" x2="712.5" y2="450" class="grid" /><line x1="920.0" y1="110" x2="920.0" y2="450" class="grid" />
+  <text x="78" y="454.0" class="axis" text-anchor="end">0.0 workers</text><text x="78" y="369.0" class="axis" text-anchor="end">3.5 workers</text><text x="78" y="284.0" class="axis" text-anchor="end">7.0 workers</text><text x="78" y="199.0" class="axis" text-anchor="end">10.5 workers</text><text x="78" y="114.0" class="axis" text-anchor="end">14.0 workers</text>
+  <text x="90.0" y="490" class="axis" text-anchor="start">0.0s</text><text x="297.5" y="490" class="axis" text-anchor="middle">54.0s</text><text x="505.0" y="490" class="axis" text-anchor="middle">108.0s</text><text x="712.5" y="490" class="axis" text-anchor="middle">162.0s</text><text x="920.0" y="490" class="axis" text-anchor="end">216.0s</text>
+  <text x="505.0" y="508" class="axis" text-anchor="middle">Elapsed Time (seconds)</text>
+
+  <!-- Reference Lines -->
+  <line x1="90" y1="158.6" x2="920" y2="158.6" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="6,4" /><text x="910" y="152.6" class="axis" fill="#a855f7" text-anchor="end">Host 80% CPU Safety Ceiling: 12 Workers</text>
+
+  <!-- Data Polyline -->
+  <polyline fill="none" stroke="#22c55e" stroke-width="3.0" points="90.0,450.0 97.7,450.0 105.4,377.1 113.1,377.1 120.7,377.1 128.4,377.1 136.1,377.1 143.8,377.1 151.5,377.1 159.2,377.1 166.9,377.1 174.5,377.1 182.2,377.1 193.8,158.6 201.4,158.6 209.1,158.6 216.8,158.6 224.5,158.6 232.2,158.6 239.9,158.6 247.5,158.6 255.2,158.6 262.9,158.6 270.6,158.6 278.3,158.6 286.0,158.6 293.7,158.6 301.3,158.6 309.0,158.6 316.7,158.6 324.4,158.6 332.1,158.6 339.8,158.6 347.5,158.6 355.1,158.6 362.8,158.6 370.5,158.6 378.2,158.6 385.9,158.6 397.4,158.6 405.1,158.6 412.8,158.6 420.5,158.6 428.1,158.6 435.8,158.6 443.5,158.6 451.2,158.6 458.9,158.6 466.6,158.6 474.3,158.6 481.9,158.6 489.6,158.6 497.3,158.6 505.0,158.6 512.7,158.6 520.4,158.6 528.1,158.6 535.7,158.6 543.4,158.6 551.1,158.6 558.8,158.6 566.5,158.6 574.2,158.6 581.9,158.6 593.4,158.6 601.1,158.6 608.8,158.6 616.4,158.6 624.1,158.6 631.8,158.6 639.5,158.6 647.2,158.6 654.9,158.6 662.5,158.6 670.2,158.6 677.9,158.6 685.6,158.6 693.3,158.6 701.0,158.6 708.7,158.6 716.3,158.6 724.0,158.6 731.7,158.6 739.4,158.6 747.1,158.6 754.8,158.6 762.5,158.6 770.1,158.6 777.8,158.6 785.5,158.6 797.0,158.6 804.7,158.6 812.4,158.6 820.1,158.6 827.8,158.6 835.5,158.6 843.1,158.6 850.8,158.6 858.5,158.6 866.2,158.6 873.9,158.6 881.6,158.6 889.3,158.6 896.9,158.6 904.6,158.6 912.3,158.6 920.0,158.6" />
+</svg>

@@ -9,11 +9,46 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$ROOT_DIR"
 
 # Auto-detect ActiveFormulaName from Master/orchestrator/orchestrator.go if not specified
 DETECTED_NAME=$(grep -oP 'const ActiveFormulaName\s*=\s*"\K[^"]+' "$ROOT_DIR/Master/orchestrator/orchestrator.go" 2>/dev/null || echo "balanced_resource_backlog")
 FORMULA_NAME="${1:-$DETECTED_NAME}"
 LOAD_SCRIPT="${2:-$ROOT_DIR/scripts/steady_balanced_load/main.go}"
+if [[ "$LOAD_SCRIPT" != /* ]]; then
+    LOAD_SCRIPT="$ROOT_DIR/$LOAD_SCRIPT"
+fi
+WORKLOAD_ARGS=("${@:3}")
+METRICS_URL="${METRICS_URL:-http://127.0.0.1:8080/metrics}"
+
+if [ ! -f "$LOAD_SCRIPT" ]; then
+    echo "Workload script not found: $LOAD_SCRIPT"
+    exit 1
+fi
+
+wait_for_metrics() {
+    local attempts=15
+    local resp
+
+    echo "Checking Master metrics endpoint before starting workload..."
+    for _ in $(seq 1 "$attempts"); do
+        resp=$(curl -fsS --max-time 3 "$METRICS_URL" 2>/dev/null || true)
+        if RESP="$resp" python3 -c 'import json, os; json.loads(os.environ["RESP"])' 2>/dev/null; then
+            echo "Metrics endpoint is ready."
+            return 0
+        fi
+        sleep 2
+    done
+
+    echo "Metrics endpoint is not returning JSON: $METRICS_URL"
+    echo "Graphs need live samples from /metrics. Restart with ./scripts/start_kubelite.sh and try again."
+    echo "If Redis is still mapped to :8080, recreate it without that mapping:"
+    echo "  docker rm -f kubelite-redis"
+    echo "  ./scripts/start_kubelite.sh"
+    return 1
+}
+
+wait_for_metrics
 
 TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 RUN_DIR="$ROOT_DIR/tests/$FORMULA_NAME/run_$TIMESTAMP"
@@ -55,6 +90,7 @@ echo " 📊 KubeLite Benchmark Session Initialized"
 echo " Formula  : $FORMULA_NAME"
 echo " Run Dir  : $RUN_DIR"
 echo " Workload : $LOAD_SCRIPT"
+echo " Metrics  : $METRICS_URL"
 echo "================================================================================"
 
 # Initialize CSV header
@@ -69,17 +105,18 @@ poll_metrics() {
     while true; do
         sleep 2
         local resp
-        resp=$(curl -s --max-time 5 http://localhost:8080/metrics 2>/dev/null || echo "")
+        resp=$(curl -fsS --max-time 5 "$METRICS_URL" 2>/dev/null || echo "")
         if [ -n "$resp" ] && [ "$resp" != "null" ]; then
             local now=$(date +%s)
             local elapsed=$((now - prev_time))
             if [ "$elapsed" -le 0 ]; then elapsed=1; fi
 
             # Extract metrics using python standard library (no dependencies needed)
-            python3 -c "
-import json, sys
+            local row
+            row=$(RESP="$resp" python3 -c "
+import json, os
 try:
-    d = json.loads('''$resp''')
+    d = json.loads(os.environ['RESP'])
     now = $now
     elapsed = $elapsed
     prev_req = $prev_req
@@ -101,14 +138,17 @@ try:
         f\"{rps:.2f}\",
         f\"{tps:.2f}\"
     ]
-    print(','.join(row))
+    print(','.join(row), end='')
 except Exception:
     pass
-" >> "$CSV_FILE" 2>/dev/null || true
+" 2>/dev/null || true)
 
-            prev_req=$(tail -n 1 "$CSV_FILE" | cut -d',' -f6 2>/dev/null || echo "$prev_req")
-            prev_task=$(tail -n 1 "$CSV_FILE" | cut -d',' -f7 2>/dev/null || echo "$prev_task")
-            prev_time=$now
+            if [ -n "$row" ]; then
+                echo "$row" >> "$CSV_FILE"
+                prev_req=$(printf '%s\n' "$row" | cut -d',' -f6 2>/dev/null || echo "$prev_req")
+                prev_task=$(printf '%s\n' "$row" | cut -d',' -f7 2>/dev/null || echo "$prev_task")
+                prev_time=$now
+            fi
         fi
     done
 }
@@ -118,17 +158,42 @@ poll_metrics &
 POLLER_PID=$!
 
 cleanup() {
+    trap - SIGINT SIGTERM
     echo ""
     echo "================================================================================"
     echo " Finishing benchmark session... Processing charts..."
     kill $POLLER_PID 2>/dev/null || true
     docker stop kubelite-workload 2>/dev/null || true
 
-    # Run Python chart visualizer
-    python3 "$ROOT_DIR/scripts/generate_charts.py" "$CSV_FILE" "$RUN_DIR" "$FORMULA_NAME"
+    local sample_count=0
+    if [ -f "$CSV_FILE" ]; then
+        sample_count=$(($(wc -l < "$CSV_FILE") - 1))
+        if [ "$sample_count" -lt 0 ]; then sample_count=0; fi
+    fi
+
+    local exit_code=0
+
+    if [ ! -f "$CSV_FILE" ]; then
+        echo " ⚠️  Metrics CSV was not created: $CSV_FILE"
+        echo "    Check that the benchmark can write to the run directory and try again."
+        exit_code=1
+    elif [ "$sample_count" -eq 0 ]; then
+        echo " ⚠️  Metrics CSV has no samples yet: $CSV_FILE"
+        echo "    Check that the master node is reachable at $METRICS_URL while the benchmark runs."
+        exit_code=1
+    else
+        # Run Python chart visualizer
+        python3 "$ROOT_DIR/scripts/generate_charts.py" "$CSV_FILE" "$RUN_DIR" "$FORMULA_NAME"
+        if [ -f "$RUN_DIR/1_traffic_throughput.svg" ] && [ -f "$RUN_DIR/autoscaling_performance.svg" ]; then
+            echo " ✅ Charts generated successfully."
+        else
+            echo " ⚠️  Chart generation did not produce the expected SVG files."
+            exit_code=1
+        fi
+    fi
 
     echo "================================================================================"
-    echo " 🎯 Results and Graphs Saved Successfully!"
+    echo " 🎯 Benchmark Session Saved"
     echo " Output Directory: $RUN_DIR"
     echo "   • CSV Log  : $CSV_FILE"
     echo "   • Formula  : $FORMULA_FILE"
@@ -140,7 +205,7 @@ cleanup() {
     echo "   • Overview : $RUN_DIR/autoscaling_performance.svg"
     echo "   • Overview : $RUN_DIR/cpu_memory_equilibrium.svg"
     echo "================================================================================"
-    exit 0
+    exit "$exit_code"
 }
 
 trap cleanup SIGINT SIGTERM
@@ -151,7 +216,7 @@ echo "--------------------------------------------------------------------------
 
 # Run the selected Go load test workload (native Go or via Docker)
 if command -v go >/dev/null 2>&1; then
-    go run "$LOAD_SCRIPT" || true
+    go run "$LOAD_SCRIPT" "${WORKLOAD_ARGS[@]}" || true
 else
     echo "Go not found on host. Running workload generator via Docker (golang:alpine)..."
     REL_SCRIPT="${LOAD_SCRIPT#$ROOT_DIR/}"
@@ -161,6 +226,6 @@ else
         -v "$HOME/go/pkg/mod":/go/pkg/mod \
         -w /app \
         --network container:kubelite-redis \
-        golang:alpine go run "$REL_SCRIPT" || true
+        golang:alpine go run "$REL_SCRIPT" "${WORKLOAD_ARGS[@]}" || true
 fi
 cleanup

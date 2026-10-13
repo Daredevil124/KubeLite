@@ -1,0 +1,57 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 650" width="1000" height="650" style="background:#0c0a09; font-family:'Inter',system-ui,sans-serif;">
+  <style>
+    .grid { stroke: #27231f; stroke-width: 1; }
+    .title { font-size: 16px; font-weight: 700; fill: #fafaf9; }
+    .sub { font-size: 11px; fill: #a8a29e; font-family: monospace; }
+    .axis { font-size: 11px; fill: #78716c; font-family: monospace; }
+    .box { fill: #141210; stroke: #3d3832; stroke-width: 1; rx: 6px; }
+  </style>
+
+  <!-- Formula Header Box -->
+  <rect x="25" y="15" width="950" height="145" class="box" />
+  <text x="40" y="38" class="title">AUTOSCALING FORMULA &amp; MATHEMATICAL DEFINITIONS</text>
+  <text x="40" y="60" class="sub" fill="#ea580c">1. ResourceDemand = noOfWorkers × max(cpuUsage / 70.0, memoryUsage / 75.0)</text>
+  <text x="40" y="80" class="sub" fill="#ea580c">2. TrafficDemand  = (queueLength / 5.0) + max(0, (rps - tps) / 2.0)</text>
+  <text x="40" y="100" class="sub" fill="#ea580c">3. x (Desired)    = max(1, ⌈max(ResourceDemand, TrafficDemand)⌉)</text>
+  <text x="40" y="120" class="sub" fill="#16a34a">4. Target Workers = min(x, min(y, z))  where y = ⌊(CPUs×0.8)/0.5⌋, z = ⌊(RAM_MB×0.8)/256⌋</text>
+  <text x="40" y="142" class="axis">Plot: Workload Velocity (RPS &amp; Queue Backlog) vs. Replicas Scaled (role=worker)</text>
+
+  <!-- Plot Background -->
+  <rect x="90" y="180" width="820" height="390" fill="#141210" stroke="#27231f" />
+
+  <!-- Grid lines -->
+  <line x1="90" y1="375.0" x2="910" y2="375.0" class="grid" />
+  <line x1="500.0" y1="180" x2="500.0" y2="570" class="grid" />
+
+  <!-- Data Lines -->
+  <!-- RPS (amber) - Scaled to max_rps -->
+  <polyline fill="none" stroke="#d97706" stroke-width="2" stroke-dasharray="4,4" points="90.0,180.0 107.4,566.0 124.9,565.5 142.3,565.1 159.8,564.6 177.2,566.9 194.7,568.2 212.1,565.5 229.6,567.3 247.0,568.2 264.5,566.9 281.9,568.2 308.1,566.4 325.5,563.3 343.0,566.4 360.4,566.0 377.9,566.9 395.3,564.6 412.8,566.9 430.2,566.9 447.7,566.9 465.1,566.0 482.6,566.9 500.0,567.3 517.4,566.0 534.9,566.0 552.3,565.1 569.8,567.3 587.2,565.1 604.7,566.4 622.1,563.7 639.6,567.3 657.0,568.7 674.5,568.2 691.9,567.8 709.4,568.7 726.8,566.0 753.0,567.6 770.4,565.1 787.9,566.9 805.3,566.0 822.8,562.4 840.2,565.1 857.7,565.5 875.1,563.3 892.6,567.3 910.0,565.5" />
+  <!-- Queue (red) - Scaled to max_queue -->
+  <polyline fill="none" stroke="#dc2626" stroke-width="2" points="90.0,563.4 107.4,553.5 124.9,542.5 142.3,530.3 159.8,535.8 177.2,529.2 194.7,528.1 212.1,517.1 229.6,514.9 247.0,510.5 264.5,502.8 281.9,499.5 308.1,486.3 325.5,469.7 343.0,460.9 360.4,451.0 377.9,443.3 395.3,430.1 412.8,422.4 430.2,414.7 447.7,406.9 465.1,397.0 482.6,389.3 500.0,382.7 517.4,375.0 534.9,365.1 552.3,356.3 569.8,349.7 587.2,337.5 604.7,328.7 622.1,313.3 639.6,307.8 657.0,305.6 674.5,301.2 691.9,296.8 709.4,293.5 726.8,283.6 753.0,275.8 770.4,264.8 787.9,258.2 805.3,253.8 822.8,236.2 840.2,224.1 857.7,213.1 875.1,196.5 892.6,189.9 910.0,180.0" />
+  <!-- Workers (green) - Scaled to max_workers -->
+  <polyline fill="none" stroke="#16a34a" stroke-width="3" points="90.0,537.5 107.4,537.5 124.9,537.5 142.3,537.5 159.8,245.0 177.2,245.0 194.7,245.0 212.1,245.0 229.6,245.0 247.0,245.0 264.5,245.0 281.9,245.0 308.1,245.0 325.5,245.0 343.0,245.0 360.4,245.0 377.9,245.0 395.3,245.0 412.8,245.0 430.2,245.0 447.7,245.0 465.1,245.0 482.6,245.0 500.0,245.0 517.4,245.0 534.9,245.0 552.3,180.0 569.8,180.0 587.2,180.0 604.7,180.0 622.1,180.0 639.6,180.0 657.0,180.0 674.5,180.0 691.9,180.0 709.4,180.0 726.8,180.0 753.0,180.0 770.4,180.0 787.9,180.0 805.3,180.0 822.8,180.0 840.2,180.0 857.7,180.0 875.1,180.0 892.6,180.0 910.0,180.0" />
+
+  <!-- Axes Labels -->
+  <text x="90" y="620" class="axis">0s</text>
+  <text x="500.0" y="620" class="axis" text-anchor="middle">Elapsed Time (94.0s)</text>
+  <text x="910" y="620" class="axis" text-anchor="end">94.0s</text>
+
+  <!-- Left Axis (Workers) -->
+  <text x="25" y="195" class="axis" fill="#16a34a">Workers: 12</text>
+  <text x="25" y="570" class="axis" fill="#16a34a">0</text>
+
+  <!-- Right Axis (Queue / RPS) -->
+  <text x="920" y="195" class="axis" fill="#dc2626">Queue: 354</text>
+  <text x="920" y="215" class="axis" fill="#d97706">RPS: 435.0</text>
+  <text x="920" y="570" class="axis" fill="#dc2626">0</text>
+
+  <!-- Legend -->
+  <circle cx="110" cy="205" r="5" fill="#16a34a" />
+  <text x="122" y="209" class="axis" fill="#fafaf9">Active Workers (Left Axis)</text>
+
+  <circle cx="310" cy="205" r="5" fill="#dc2626" />
+  <text x="322" y="209" class="axis" fill="#fafaf9">Queue Backlog (Right Axis)</text>
+
+  <line x1="510" y1="205" x2="530" y2="205" stroke="#d97706" stroke-width="2" stroke-dasharray="3,3" />
+  <text x="538" y="209" class="axis" fill="#fafaf9">Incoming RPS (Normalized)</text>
+</svg>

@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 650" width="1000" height="650" style="background:#0c0a09; font-family:'Inter',system-ui,sans-serif;">
+  <style>
+    .grid { stroke: #27231f; stroke-width: 1; }
+    .title { font-size: 16px; font-weight: 700; fill: #fafaf9; }
+    .sub { font-size: 11px; fill: #a8a29e; font-family: monospace; }
+    .axis { font-size: 11px; fill: #78716c; font-family: monospace; }
+    .box { fill: #141210; stroke: #3d3832; stroke-width: 1; rx: 6px; }
+  </style>
+
+  <!-- Formula Header Box -->
+  <rect x="25" y="15" width="950" height="145" class="box" />
+  <text x="40" y="38" class="title">CLUSTER EQUILIBRIUM &amp; UTILIZATION TARGETS</text>
+  <text x="40" y="60" class="sub" fill="#ea580c">Target CPU = 70.0%  (cpuRatio = cpuUsage / 70.0)</text>
+  <text x="40" y="80" class="sub" fill="#ea580c">Target RAM = 75.0%  (memRatio = memoryUsage / 75.0)</text>
+  <text x="40" y="100" class="sub" fill="#ea580c">Resource Pressure: D_resource = noOfWorkers × max(cpuRatio, memRatio)</text>
+  <text x="40" y="120" class="sub" fill="#16a34a">Goal: Stabilize cluster load near dotted 70%/75% reference thresholds during bursts</text>
+  <text x="40" y="142" class="axis">Plot: Average Container Utilization % vs. Stabilization Setpoints</text>
+
+  <!-- Plot Background -->
+  <rect x="90" y="180" width="820" height="390" fill="#141210" stroke="#27231f" />
+
+  <!-- Reference Target Lines -->
+  <line x1="90" y1="297.0" x2="910" y2="297.0" stroke="#ea580c" stroke-width="1.5" stroke-dasharray="6,4" />
+  <text x="918" y="301.0" class="axis" fill="#ea580c">Target CPU: 70%</text>
+
+  <line x1="90" y1="277.5" x2="910" y2="277.5" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="6,4" />
+  <text x="918" y="281.5" class="axis" fill="#3b82f6">Target RAM: 75%</text>
+
+  <!-- Data Lines -->
+  <polyline fill="none" stroke="#3b82f6" stroke-width="2" points="90.0,565.5 107.4,565.5 124.9,565.5 142.3,563.7 159.8,563.7 177.2,563.7 194.7,563.7 212.1,563.7 229.6,563.7 247.0,563.7 264.5,563.7 281.9,563.7 308.1,563.7 325.5,563.7 343.0,563.7 360.4,563.7 377.9,563.7 395.3,563.7 412.8,563.7 430.2,563.7 447.7,563.7 465.1,563.7 482.6,563.7 500.0,563.7 517.4,563.7 534.9,563.7 552.3,566.2 569.8,566.2 587.2,566.2 604.7,566.2 622.1,566.2 639.6,566.2 657.0,566.2 674.5,566.2 691.9,566.2 709.4,566.2 726.8,566.2 753.0,566.2 770.4,566.2 787.9,566.2 805.3,566.2 822.8,566.2 840.2,566.2 857.7,566.2 875.1,566.2 892.6,566.2 910.0,566.2" />
+  <polyline fill="none" stroke="#ea580c" stroke-width="2.5" points="90.0,570.0 107.4,570.0 124.9,570.0 142.3,373.8 159.8,373.8 177.2,373.8 194.7,373.8 212.1,373.8 229.6,373.8 247.0,373.8 264.5,373.8 281.9,373.8 308.1,373.8 325.5,373.8 343.0,373.8 360.4,373.8 377.9,373.8 395.3,373.8 412.8,373.8 430.2,373.8 447.7,373.8 465.1,373.8 482.6,373.8 500.0,373.8 517.4,373.8 534.9,373.8 552.3,374.1 569.8,374.1 587.2,374.1 604.7,374.1 622.1,374.1 639.6,374.1 657.0,374.1 674.5,374.1 691.9,374.1 709.4,374.1 726.8,374.1 753.0,374.1 770.4,374.1 787.9,374.1 805.3,374.1 822.8,374.1 840.2,374.1 857.7,374.1 875.1,374.1 892.6,374.1 910.0,374.1" />
+
+  <!-- Axes Labels -->
+  <text x="90" y="620" class="axis">0s</text>
+  <text x="500.0" y="620" class="axis" text-anchor="middle">Elapsed Time (94.0s)</text>
+  <text x="910" y="620" class="axis" text-anchor="end">94.0s</text>
+
+  <!-- Left Y-Axis (Percentages) -->
+  <text x="35" y="190" class="axis">100%</text>
+  <text x="35" y="301.0" class="axis" fill="#ea580c">70%</text>
+  <text x="35" y="375.0" class="axis">50%</text>
+  <text x="35" y="570" class="axis">0%</text>
+
+  <!-- Legend -->
+  <circle cx="110" cy="205" r="5" fill="#ea580c" />
+  <text x="122" y="209" class="axis" fill="#fafaf9">Average CPU % (all workers)</text>
+
+  <circle cx="330" cy="205" r="5" fill="#3b82f6" />
+  <text x="342" y="209" class="axis" fill="#fafaf9">Average Memory % (all workers)</text>
+</svg>

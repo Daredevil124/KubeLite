@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" width="1000" height="520" style="background:#0c0a09; font-family:'Inter',system-ui,sans-serif;">
+  <style>
+    .grid { stroke: #201d1a; stroke-width: 1; }
+    .title { font-size: 15px; font-weight: 700; fill: #fafaf9; letter-spacing: 0.5px; }
+    .sub { font-size: 11px; fill: #a8a29e; font-family: monospace; }
+    .axis { font-size: 11px; fill: #78716c; font-family: monospace; }
+    .box { fill: #141210; stroke: #3d3832; stroke-width: 1; rx: 6px; }
+  </style>
+
+  <!-- Header Box -->
+  <rect x="25" y="15" width="950" height="85" class="box" />
+  <text x="40" y="38" class="title">QUEUE BACKLOG: PENDING WORKLOAD IN REDIS</text>
+  <text x="40" y="58" class="sub">Unprocessed task payloads waiting in &#x27;task_queue&#x27; broker</text>
+  <line x1="100" y1="88" x2="120" y2="88" stroke="#ef4444" stroke-width="2.5" /><text x="128" y="92" class="axis" fill="#fafaf9">Redis Queue Depth (task_queue)</text>
+
+  <!-- Plot Background -->
+  <rect x="90" y="110" width="830" height="340" fill="#141210" stroke="#27231f" />
+
+  <!-- Grid & Axes -->
+  <line x1="90" y1="450.0" x2="920" y2="450.0" class="grid" /><line x1="90" y1="365.0" x2="920" y2="365.0" class="grid" /><line x1="90" y1="280.0" x2="920" y2="280.0" class="grid" /><line x1="90" y1="195.0" x2="920" y2="195.0" class="grid" /><line x1="90" y1="110.0" x2="920" y2="110.0" class="grid" /><line x1="90.0" y1="110" x2="90.0" y2="450" class="grid" /><line x1="297.5" y1="110" x2="297.5" y2="450" class="grid" /><line x1="505.0" y1="110" x2="505.0" y2="450" class="grid" /><line x1="712.5" y1="110" x2="712.5" y2="450" class="grid" /><line x1="920.0" y1="110" x2="920.0" y2="450" class="grid" />
+  <text x="78" y="454.0" class="axis" text-anchor="end">0.0 tasks</text><text x="78" y="369.0" class="axis" text-anchor="end">101.8 tasks</text><text x="78" y="284.0" class="axis" text-anchor="end">203.5 tasks</text><text x="78" y="199.0" class="axis" text-anchor="end">305.3 tasks</text><text x="78" y="114.0" class="axis" text-anchor="end">407.1 tasks</text>
+  <text x="90.0" y="490" class="axis" text-anchor="start">0.0s</text><text x="297.5" y="490" class="axis" text-anchor="middle">23.5s</text><text x="505.0" y="490" class="axis" text-anchor="middle">47.0s</text><text x="712.5" y="490" class="axis" text-anchor="middle">70.5s</text><text x="920.0" y="490" class="axis" text-anchor="end">94.0s</text>
+  <text x="505.0" y="508" class="axis" text-anchor="middle">Elapsed Time (seconds)</text>
+
+  <!-- Reference Lines -->
+  
+
+  <!-- Data Polyline -->
+  <polyline fill="none" stroke="#ef4444" stroke-width="2.5" points="90.0,445.0 107.7,437.5 125.3,429.1 143.0,419.9 160.6,424.1 178.3,419.1 196.0,418.3 213.6,409.9 231.3,408.2 248.9,404.9 266.6,399.1 284.3,396.5 310.7,386.5 328.4,374.0 346.1,367.3 363.7,359.8 381.4,354.0 399.0,343.9 416.7,338.1 434.4,332.2 452.0,326.4 469.7,318.9 487.3,313.0 505.0,308.0 522.7,302.2 540.3,294.7 558.0,288.0 575.6,283.0 593.3,273.8 611.0,267.1 628.6,255.4 646.3,251.2 663.9,249.6 681.6,246.2 699.3,242.9 716.9,240.4 734.6,232.9 761.1,227.0 778.7,218.7 796.4,213.6 814.0,210.3 831.7,196.9 849.4,187.8 867.0,179.4 884.7,166.9 902.3,161.9 920.0,154.3" />
+</svg>

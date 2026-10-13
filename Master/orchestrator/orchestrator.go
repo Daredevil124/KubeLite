@@ -6,8 +6,10 @@ import (
 	"context"
 	"log"
 	"math"
+	"os"
 	"runtime"
-	"syscall"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -88,14 +90,36 @@ func Orchestrate() {
 func getSystemCaps() (y int64, z int64) {
 	cpus := float64(runtime.NumCPU())         //extracts host's total number of CPU cores
 	y = int64(math.Floor((cpus * 0.8) / 0.5)) // at maxt this code uses 80% of total cpus
-	var mem syscall.Sysinfo_t                 //syscall.Sysinfo_t extraxts hosts memory
-	if err := syscall.Sysinfo(&mem); err != nil {
+	totalMem := getHostMemoryMB()
+	if totalMem <= 0 {
 		z = y
 		return y, z
 	}
-	totalMem := float64(mem.Totalram*uint64(mem.Unit)) / (1024 * 1024) //Total RAM converted to megabytes
 	z = int64(math.Floor((totalMem * 0.8) / 256.0))
 	return y, z
+}
+
+func getHostMemoryMB() float64 {
+	if raw := os.Getenv("KUBELITE_HOST_RAM_MB"); raw != "" {
+		if mb, err := strconv.ParseFloat(raw, 64); err == nil && mb > 0 {
+			return mb
+		}
+	}
+
+	data, err := os.ReadFile("/proc/meminfo")
+	if err != nil {
+		return 0
+	}
+	for _, line := range strings.Split(string(data), "\n") {
+		fields := strings.Fields(line)
+		if len(fields) >= 2 && fields[0] == "MemTotal:" {
+			kb, err := strconv.ParseFloat(fields[1], 64)
+			if err == nil {
+				return kb / 1024.0
+			}
+		}
+	}
+	return 0
 }
 
 // ActiveFormulaName identifies the active autoscaling strategy for automated benchmarking.
@@ -146,4 +170,3 @@ func CalculateDesiredContainers(
 
 	return x
 }
-

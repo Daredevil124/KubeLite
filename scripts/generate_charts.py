@@ -9,8 +9,17 @@ import sys
 import os
 import csv
 import math
+from html import escape
+
+def host_worker_cpu_cap():
+    cpus = os.cpu_count() or 1
+    return max(1, math.floor((float(cpus) * 0.8) / 0.5))
 
 def generate_charts(csv_path, output_dir, formula_text):
+    if not os.path.exists(csv_path):
+        print(f"Metrics CSV not found: {csv_path}")
+        return False
+
     rows = []
     with open(csv_path, 'r') as f:
         reader = csv.DictReader(f)
@@ -30,7 +39,9 @@ def generate_charts(csv_path, output_dir, formula_text):
 
     if not rows:
         print("No data rows found in CSV.")
-        return
+        return False
+
+    os.makedirs(output_dir, exist_ok=True)
 
     # Normalize time to start at 0
     t0 = rows[0]['time']
@@ -76,7 +87,7 @@ def generate_charts(csv_path, output_dir, formula_text):
             {'key': 'workers', 'label': 'Active Worker Replicas', 'color': '#22c55e', 'dash': '', 'width': 3.0},
         ],
         reference_lines=[
-            {'val': 16.0, 'label': 'Host 80% Safety Ceiling: 16 Workers', 'color': '#a855f7'}
+            {'val': float(host_worker_cpu_cap()), 'label': f'Host 80% CPU Safety Ceiling: {host_worker_cpu_cap()} Workers', 'color': '#a855f7'}
         ]
     )
 
@@ -112,6 +123,7 @@ def generate_charts(csv_path, output_dir, formula_text):
     create_equilibrium_svg(rows, max_t, os.path.join(output_dir, "cpu_memory_equilibrium.svg"), formula_text)
 
     print(f"✅ Generated 5 dedicated metric charts + 2 composite charts in: {output_dir}")
+    return True
 
 def create_single_chart_svg(rows, max_t, filepath, title, subtitle, y_min, y_max, y_unit, series, reference_lines=None):
     W, H = 1000, 520
@@ -127,6 +139,10 @@ def create_single_chart_svg(rows, max_t, filepath, title, subtitle, y_min, y_max
         if span <= 0: span = 1.0
         clamped = min(max(val, y_min), y_max)
         return pad_t + ph - ((clamped - y_min) / span) * ph
+
+    title = escape(str(title))
+    subtitle = escape(str(subtitle))
+    y_unit = escape(str(y_unit))
 
     # Build grid lines (4 horizontal divisions)
     grid_lines = []
@@ -155,7 +171,7 @@ def create_single_chart_svg(rows, max_t, filepath, title, subtitle, y_min, y_max
             if y_min <= ref['val'] <= y_max:
                 ry = ty(ref['val'])
                 ref_svg.append(f'<line x1="{pad_l}" y1="{ry:.1f}" x2="{pad_l + pw}" y2="{ry:.1f}" stroke="{ref["color"]}" stroke-width="1.5" stroke-dasharray="6,4" />')
-                ref_svg.append(f'<text x="{pad_l + pw - 10}" y="{ry - 6:.1f}" class="axis" fill="{ref["color"]}" text-anchor="end">{ref["label"]}</text>')
+                ref_svg.append(f'<text x="{pad_l + pw - 10}" y="{ry - 6:.1f}" class="axis" fill="{ref["color"]}" text-anchor="end">{escape(str(ref["label"]))}</text>')
 
     # Data series lines
     series_svg = []
@@ -168,7 +184,7 @@ def create_single_chart_svg(rows, max_t, filepath, title, subtitle, y_min, y_max
 
         # Legend item
         legend_svg.append(f'<line x1="{leg_x}" y1="88" x2="{leg_x + 20}" y2="88" stroke="{s["color"]}" stroke-width="{s["width"]}"{dash_attr} />')
-        legend_svg.append(f'<text x="{leg_x + 28}" y="92" class="axis" fill="#fafaf9">{s["label"]}</text>')
+        legend_svg.append(f'<text x="{leg_x + 28}" y="92" class="axis" fill="#fafaf9">{escape(str(s["label"]))}</text>')
         leg_x += len(s["label"]) * 8 + 60
 
     svg = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 {W} {H}" width="{W}" height="{H}" style="background:#0c0a09; font-family:'Inter',system-ui,sans-serif;">
@@ -371,4 +387,5 @@ if __name__ == "__main__":
     csv_file = sys.argv[1]
     out_dir = sys.argv[2]
     formula = sys.argv[3] if len(sys.argv) > 3 else "Default Balanced Autoscaler"
-    generate_charts(csv_file, out_dir, formula)
+    if not generate_charts(csv_file, out_dir, formula):
+        sys.exit(1)

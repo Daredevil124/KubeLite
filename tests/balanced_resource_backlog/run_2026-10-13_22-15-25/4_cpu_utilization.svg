@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" width="1000" height="520" style="background:#0c0a09; font-family:'Inter',system-ui,sans-serif;">
+  <style>
+    .grid { stroke: #201d1a; stroke-width: 1; }
+    .title { font-size: 15px; font-weight: 700; fill: #fafaf9; letter-spacing: 0.5px; }
+    .sub { font-size: 11px; fill: #a8a29e; font-family: monospace; }
+    .axis { font-size: 11px; fill: #78716c; font-family: monospace; }
+    .box { fill: #141210; stroke: #3d3832; stroke-width: 1; rx: 6px; }
+  </style>
+
+  <!-- Header Box -->
+  <rect x="25" y="15" width="950" height="85" class="box" />
+  <text x="40" y="38" class="title">CLUSTER CPU UTILIZATION &amp; EQUILIBRIUM</text>
+  <text x="40" y="58" class="sub">Average CPU utilization across workers (capped at 0.5 CPU cores per container)</text>
+  <line x1="100" y1="88" x2="120" y2="88" stroke="#f97316" stroke-width="2.5" /><text x="128" y="92" class="axis" fill="#fafaf9">Average Cluster CPU %</text>
+
+  <!-- Plot Background -->
+  <rect x="90" y="110" width="830" height="340" fill="#141210" stroke="#27231f" />
+
+  <!-- Grid & Axes -->
+  <line x1="90" y1="450.0" x2="920" y2="450.0" class="grid" /><line x1="90" y1="365.0" x2="920" y2="365.0" class="grid" /><line x1="90" y1="280.0" x2="920" y2="280.0" class="grid" /><line x1="90" y1="195.0" x2="920" y2="195.0" class="grid" /><line x1="90" y1="110.0" x2="920" y2="110.0" class="grid" /><line x1="90.0" y1="110" x2="90.0" y2="450" class="grid" /><line x1="297.5" y1="110" x2="297.5" y2="450" class="grid" /><line x1="505.0" y1="110" x2="505.0" y2="450" class="grid" /><line x1="712.5" y1="110" x2="712.5" y2="450" class="grid" /><line x1="920.0" y1="110" x2="920.0" y2="450" class="grid" />
+  <text x="78" y="454.0" class="axis" text-anchor="end">0.0 %</text><text x="78" y="369.0" class="axis" text-anchor="end">25.0 %</text><text x="78" y="284.0" class="axis" text-anchor="end">50.0 %</text><text x="78" y="199.0" class="axis" text-anchor="end">75.0 %</text><text x="78" y="114.0" class="axis" text-anchor="end">100.0 %</text>
+  <text x="90.0" y="490" class="axis" text-anchor="start">0.0s</text><text x="297.5" y="490" class="axis" text-anchor="middle">54.0s</text><text x="505.0" y="490" class="axis" text-anchor="middle">108.0s</text><text x="712.5" y="490" class="axis" text-anchor="middle">162.0s</text><text x="920.0" y="490" class="axis" text-anchor="end">216.0s</text>
+  <text x="505.0" y="508" class="axis" text-anchor="middle">Elapsed Time (seconds)</text>
+
+  <!-- Reference Lines -->
+  <line x1="90" y1="212.0" x2="920" y2="212.0" stroke="#ef4444" stroke-width="1.5" stroke-dasharray="6,4" /><text x="910" y="206.0" class="axis" fill="#ef4444" text-anchor="end">Target CPU: 70%</text>
+
+  <!-- Data Polyline -->
+  <polyline fill="none" stroke="#f97316" stroke-width="2.5" points="90.0,450.0 97.7,450.0 105.4,450.0 113.1,450.0 120.7,450.0 128.4,450.0 136.1,450.0 143.8,450.0 151.5,450.0 159.2,450.0 166.9,450.0 174.5,450.0 182.2,279.2 193.8,279.2 201.4,279.2 209.1,279.2 216.8,279.2 224.5,279.2 232.2,279.2 239.9,279.2 247.5,279.2 255.2,279.2 262.9,279.2 270.6,279.2 278.3,279.2 286.0,279.2 293.7,279.2 301.3,279.2 309.0,279.2 316.7,279.2 324.4,279.2 332.1,279.2 339.8,279.2 347.5,279.2 355.1,279.2 362.8,279.2 370.5,280.4 378.2,280.4 385.9,280.4 397.4,280.4 405.1,280.4 412.8,280.4 420.5,280.4 428.1,280.4 435.8,280.4 443.5,280.4 451.2,280.4 458.9,280.4 466.6,280.4 474.3,280.4 481.9,280.4 489.6,280.4 497.3,280.4 505.0,280.4 512.7,280.4 520.4,280.4 528.1,280.4 535.7,280.4 543.4,280.4 551.1,280.4 558.8,280.2 566.5,280.2 574.2,280.2 581.9,280.2 593.4,280.2 601.1,280.2 608.8,280.2 616.4,280.2 624.1,280.2 631.8,280.2 639.5,280.2 647.2,280.2 654.9,280.2 662.5,280.2 670.2,280.2 677.9,280.2 685.6,280.2 693.3,280.2 701.0,280.2 708.7,280.2 716.3,280.2 724.0,280.2 731.7,280.2 739.4,280.1 747.1,280.1 754.8,280.1 762.5,280.1 770.1,280.1 777.8,280.1 785.5,280.1 797.0,280.1 804.7,280.1 812.4,280.1 820.1,280.1 827.8,280.1 835.5,280.1 843.1,280.1 850.8,280.1 858.5,280.1 866.2,280.1 873.9,280.1 881.6,280.1 889.3,280.1 896.9,280.1 904.6,280.1 912.3,280.1 920.0,280.1" />
+</svg>

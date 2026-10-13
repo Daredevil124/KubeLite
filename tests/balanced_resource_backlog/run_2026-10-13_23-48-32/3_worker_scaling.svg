@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" width="1000" height="520" style="background:#0c0a09; font-family:'Inter',system-ui,sans-serif;">
+  <style>
+    .grid { stroke: #201d1a; stroke-width: 1; }
+    .title { font-size: 15px; font-weight: 700; fill: #fafaf9; letter-spacing: 0.5px; }
+    .sub { font-size: 11px; fill: #a8a29e; font-family: monospace; }
+    .axis { font-size: 11px; fill: #78716c; font-family: monospace; }
+    .box { fill: #141210; stroke: #3d3832; stroke-width: 1; rx: 6px; }
+  </style>
+
+  <!-- Header Box -->
+  <rect x="25" y="15" width="950" height="85" class="box" />
+  <text x="40" y="38" class="title">AUTOSCALER REPLICA MANAGEMENT: ACTIVE WORKERS</text>
+  <text x="40" y="58" class="sub">Docker worker containers spawned with label &#x27;role=worker&#x27;</text>
+  <line x1="100" y1="88" x2="120" y2="88" stroke="#22c55e" stroke-width="3.0" /><text x="128" y="92" class="axis" fill="#fafaf9">Active Worker Replicas</text>
+
+  <!-- Plot Background -->
+  <rect x="90" y="110" width="830" height="340" fill="#141210" stroke="#27231f" />
+
+  <!-- Grid & Axes -->
+  <line x1="90" y1="450.0" x2="920" y2="450.0" class="grid" /><line x1="90" y1="365.0" x2="920" y2="365.0" class="grid" /><line x1="90" y1="280.0" x2="920" y2="280.0" class="grid" /><line x1="90" y1="195.0" x2="920" y2="195.0" class="grid" /><line x1="90" y1="110.0" x2="920" y2="110.0" class="grid" /><line x1="90.0" y1="110" x2="90.0" y2="450" class="grid" /><line x1="297.5" y1="110" x2="297.5" y2="450" class="grid" /><line x1="505.0" y1="110" x2="505.0" y2="450" class="grid" /><line x1="712.5" y1="110" x2="712.5" y2="450" class="grid" /><line x1="920.0" y1="110" x2="920.0" y2="450" class="grid" />
+  <text x="78" y="454.0" class="axis" text-anchor="end">0.0 workers</text><text x="78" y="369.0" class="axis" text-anchor="end">3.5 workers</text><text x="78" y="284.0" class="axis" text-anchor="end">7.0 workers</text><text x="78" y="199.0" class="axis" text-anchor="end">10.5 workers</text><text x="78" y="114.0" class="axis" text-anchor="end">14.0 workers</text>
+  <text x="90.0" y="490" class="axis" text-anchor="start">0.0s</text><text x="297.5" y="490" class="axis" text-anchor="middle">23.5s</text><text x="505.0" y="490" class="axis" text-anchor="middle">47.0s</text><text x="712.5" y="490" class="axis" text-anchor="middle">70.5s</text><text x="920.0" y="490" class="axis" text-anchor="end">94.0s</text>
+  <text x="505.0" y="508" class="axis" text-anchor="middle">Elapsed Time (seconds)</text>
+
+  <!-- Reference Lines -->
+  <line x1="90" y1="158.6" x2="920" y2="158.6" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="6,4" /><text x="910" y="152.6" class="axis" fill="#a855f7" text-anchor="end">Host 80% CPU Safety Ceiling: 12 Workers</text>
+
+  <!-- Data Polyline -->
+  <polyline fill="none" stroke="#22c55e" stroke-width="3.0" points="90.0,425.7 107.7,425.7 125.3,425.7 143.0,425.7 160.6,207.1 178.3,207.1 196.0,207.1 213.6,207.1 231.3,207.1 248.9,207.1 266.6,207.1 284.3,207.1 310.7,207.1 328.4,207.1 346.1,207.1 363.7,207.1 381.4,207.1 399.0,207.1 416.7,207.1 434.4,207.1 452.0,207.1 469.7,207.1 487.3,207.1 505.0,207.1 522.7,207.1 540.3,207.1 558.0,158.6 575.6,158.6 593.3,158.6 611.0,158.6 628.6,158.6 646.3,158.6 663.9,158.6 681.6,158.6 699.3,158.6 716.9,158.6 734.6,158.6 761.1,158.6 778.7,158.6 796.4,158.6 814.0,158.6 831.7,158.6 849.4,158.6 867.0,158.6 884.7,158.6 902.3,158.6 920.0,158.6" />
+</svg>

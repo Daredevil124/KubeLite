@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" width="1000" height="520" style="background:#0c0a09; font-family:'Inter',system-ui,sans-serif;">
+  <style>
+    .grid { stroke: #201d1a; stroke-width: 1; }
+    .title { font-size: 15px; font-weight: 700; fill: #fafaf9; letter-spacing: 0.5px; }
+    .sub { font-size: 11px; fill: #a8a29e; font-family: monospace; }
+    .axis { font-size: 11px; fill: #78716c; font-family: monospace; }
+    .box { fill: #141210; stroke: #3d3832; stroke-width: 1; rx: 6px; }
+  </style>
+
+  <!-- Header Box -->
+  <rect x="25" y="15" width="950" height="85" class="box" />
+  <text x="40" y="38" class="title">CLUSTER RAM CONSUMPTION (ZOOMED VIEW)</text>
+  <text x="40" y="58" class="sub">Average worker memory % (Zoomed 0–5.0% | 256MB allocated per container)</text>
+  <line x1="100" y1="88" x2="120" y2="88" stroke="#38bdf8" stroke-width="2.5" /><text x="128" y="92" class="axis" fill="#fafaf9">Average Cluster RAM %</text>
+
+  <!-- Plot Background -->
+  <rect x="90" y="110" width="830" height="340" fill="#141210" stroke="#27231f" />
+
+  <!-- Grid & Axes -->
+  <line x1="90" y1="450.0" x2="920" y2="450.0" class="grid" /><line x1="90" y1="365.0" x2="920" y2="365.0" class="grid" /><line x1="90" y1="280.0" x2="920" y2="280.0" class="grid" /><line x1="90" y1="195.0" x2="920" y2="195.0" class="grid" /><line x1="90" y1="110.0" x2="920" y2="110.0" class="grid" /><line x1="90.0" y1="110" x2="90.0" y2="450" class="grid" /><line x1="297.5" y1="110" x2="297.5" y2="450" class="grid" /><line x1="505.0" y1="110" x2="505.0" y2="450" class="grid" /><line x1="712.5" y1="110" x2="712.5" y2="450" class="grid" /><line x1="920.0" y1="110" x2="920.0" y2="450" class="grid" />
+  <text x="78" y="454.0" class="axis" text-anchor="end">0.0 %</text><text x="78" y="369.0" class="axis" text-anchor="end">1.2 %</text><text x="78" y="284.0" class="axis" text-anchor="end">2.5 %</text><text x="78" y="199.0" class="axis" text-anchor="end">3.8 %</text><text x="78" y="114.0" class="axis" text-anchor="end">5.0 %</text>
+  <text x="90.0" y="490" class="axis" text-anchor="start">0.0s</text><text x="297.5" y="490" class="axis" text-anchor="middle">54.0s</text><text x="505.0" y="490" class="axis" text-anchor="middle">108.0s</text><text x="712.5" y="490" class="axis" text-anchor="middle">162.0s</text><text x="920.0" y="490" class="axis" text-anchor="end">216.0s</text>
+  <text x="505.0" y="508" class="axis" text-anchor="middle">Elapsed Time (seconds)</text>
+
+  <!-- Reference Lines -->
+  
+
+  <!-- Data Polyline -->
+  <polyline fill="none" stroke="#38bdf8" stroke-width="2.5" points="90.0,450.0 97.7,450.0 105.4,450.0 113.1,450.0 120.7,450.0 128.4,450.0 136.1,450.0 143.8,450.0 151.5,450.0 159.2,450.0 166.9,450.0 174.5,450.0 182.2,322.2 193.8,322.2 201.4,322.2 209.1,322.2 216.8,322.2 224.5,322.2 232.2,322.2 239.9,322.2 247.5,322.2 255.2,322.2 262.9,322.2 270.6,322.2 278.3,322.2 286.0,322.2 293.7,322.2 301.3,322.2 309.0,322.2 316.7,322.2 324.4,322.2 332.1,322.2 339.8,322.2 347.5,322.2 355.1,322.2 362.8,322.2 370.5,369.1 378.2,369.1 385.9,369.1 397.4,369.1 405.1,369.1 412.8,369.1 420.5,369.1 428.1,369.1 435.8,369.1 443.5,369.1 451.2,369.1 458.9,369.1 466.6,369.1 474.3,369.1 481.9,369.1 489.6,369.1 497.3,369.1 505.0,369.1 512.7,369.1 520.4,369.1 528.1,369.1 535.7,369.1 543.4,369.1 551.1,369.1 558.8,365.7 566.5,365.7 574.2,365.7 581.9,365.7 593.4,365.7 601.1,365.7 608.8,365.7 616.4,365.7 624.1,365.7 631.8,365.7 639.5,365.7 647.2,365.7 654.9,365.7 662.5,365.7 670.2,365.7 677.9,365.7 685.6,365.7 693.3,365.7 701.0,365.7 708.7,365.7 716.3,365.7 724.0,365.7 731.7,365.7 739.4,353.4 747.1,353.4 754.8,353.4 762.5,353.4 770.1,353.4 777.8,353.4 785.5,353.4 797.0,353.4 804.7,353.4 812.4,353.4 820.1,353.4 827.8,353.4 835.5,353.4 843.1,353.4 850.8,353.4 858.5,353.4 866.2,353.4 873.9,353.4 881.6,353.4 889.3,353.4 896.9,353.4 904.6,353.4 912.3,353.4 920.0,353.4" />
+</svg>
