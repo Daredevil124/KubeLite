@@ -3,11 +3,37 @@ package metrics
 import (
 	"context"
 	"fmt"
+	"sync"
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
 	"github.com/docker/docker/client"
 )
+
+type ClusterMetricsCache struct {
+	mu            sync.RWMutex
+	CPUPercent    float64
+	MemoryPercent float64
+	WorkerCount   int
+}
+
+var clusterCache ClusterMetricsCache
+
+// UpdateClusterMetrics updates the cached cluster telemetry.
+func UpdateClusterMetrics(cpu, memory float64, workerCount int) {
+	clusterCache.mu.Lock()
+	defer clusterCache.mu.Unlock()
+	clusterCache.CPUPercent = cpu
+	clusterCache.MemoryPercent = memory
+	clusterCache.WorkerCount = workerCount
+}
+
+// GetCachedClusterMetrics returns the cached telemetry instantly (< 1ms).
+func GetCachedClusterMetrics() (float64, float64, int) {
+	clusterCache.mu.RLock()
+	defer clusterCache.mu.RUnlock()
+	return clusterCache.CPUPercent, clusterCache.MemoryPercent, clusterCache.WorkerCount
+}
 
 func GetWorkerContainers(ctx context.Context) (*client.Client, []container.Summary, error) {
 	f := filters.NewArgs()

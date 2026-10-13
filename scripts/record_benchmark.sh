@@ -69,7 +69,7 @@ poll_metrics() {
     while true; do
         sleep 2
         local resp
-        resp=$(curl -s --max-time 2 http://localhost:8080/metrics 2>/dev/null || echo "")
+        resp=$(curl -s --max-time 5 http://localhost:8080/metrics 2>/dev/null || echo "")
         if [ -n "$resp" ] && [ "$resp" != "null" ]; then
             local now=$(date +%s)
             local elapsed=$((now - prev_time))
@@ -122,6 +122,7 @@ cleanup() {
     echo "================================================================================"
     echo " Finishing benchmark session... Processing charts..."
     kill $POLLER_PID 2>/dev/null || true
+    docker stop kubelite-workload 2>/dev/null || true
 
     # Run Python chart visualizer
     python3 "$ROOT_DIR/scripts/generate_charts.py" "$CSV_FILE" "$RUN_DIR" "$FORMULA_NAME"
@@ -131,8 +132,13 @@ cleanup() {
     echo " Output Directory: $RUN_DIR"
     echo "   • CSV Log  : $CSV_FILE"
     echo "   • Formula  : $FORMULA_FILE"
-    echo "   • Graph 1  : $RUN_DIR/autoscaling_performance.svg"
-    echo "   • Graph 2  : $RUN_DIR/cpu_memory_equilibrium.svg"
+    echo "   • Chart 1  : $RUN_DIR/1_traffic_throughput.svg (RPS vs TPS)"
+    echo "   • Chart 2  : $RUN_DIR/2_queue_backlog.svg (Queue Depth)"
+    echo "   • Chart 3  : $RUN_DIR/3_worker_scaling.svg (Container Scaling)"
+    echo "   • Chart 4  : $RUN_DIR/4_cpu_utilization.svg (Cluster CPU %)"
+    echo "   • Chart 5  : $RUN_DIR/5_memory_utilization.svg (Zoomed RAM %)"
+    echo "   • Overview : $RUN_DIR/autoscaling_performance.svg"
+    echo "   • Overview : $RUN_DIR/cpu_memory_equilibrium.svg"
     echo "================================================================================"
     exit 0
 }
@@ -143,6 +149,18 @@ echo "Starting workload generator: $LOAD_SCRIPT"
 echo "Press [CTRL+C] when you want to finish the test and generate all charts."
 echo "--------------------------------------------------------------------------------"
 
-# Run the selected Go load test workload
-go run "$LOAD_SCRIPT" || true
+# Run the selected Go load test workload (native Go or via Docker)
+if command -v go >/dev/null 2>&1; then
+    go run "$LOAD_SCRIPT" || true
+else
+    echo "Go not found on host. Running workload generator via Docker (golang:alpine)..."
+    REL_SCRIPT="${LOAD_SCRIPT#$ROOT_DIR/}"
+    docker rm -f kubelite-workload 2>/dev/null || true
+    docker run --rm --name kubelite-workload \
+        -v "$ROOT_DIR":/app \
+        -v "$HOME/go/pkg/mod":/go/pkg/mod \
+        -w /app \
+        --network container:kubelite-redis \
+        golang:alpine go run "$REL_SCRIPT" || true
+fi
 cleanup

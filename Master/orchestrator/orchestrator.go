@@ -13,6 +13,10 @@ import (
 
 func Orchestrate() {
 	ctx := context.Background()
+	// Baseline metrics so /metrics is immediately ready on startup
+	if _, workers, err := metrics.GetWorkerContainers(ctx); err == nil {
+		metrics.UpdateClusterMetrics(0.0, 0.0, len(workers))
+	}
 	ticker := time.NewTicker(10 * time.Second) //background process that pushes a timestamp in ticker.C pipe every 10 seconds
 	defer ticker.Stop()
 	var noOfContainer int64
@@ -39,6 +43,7 @@ func Orchestrate() {
 			log.Printf("Error fetching memory data: %v", err)
 			continue
 		}
+		metrics.UpdateClusterMetrics(cpuUsage, memoryUsage, len(currentWorkers))
 		queueLength, err := metrics.GetQueueLength()
 		if err != nil {
 			log.Printf("Error fetching queue length: %v", err)
@@ -75,6 +80,7 @@ func Orchestrate() {
 			reqContianers := len(currentWorkers) - int(noOfContainer)
 			Destroy(int64(reqContianers))
 		}
+		metrics.UpdateClusterMetrics(cpuUsage, memoryUsage, int(noOfContainer))
 		cli.Close()
 
 	}

@@ -7,8 +7,8 @@ WORKDIR /app
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy all the Go source files
-COPY *.go ./
+# Copy all the Go source files and directories (like tasks/)
+COPY . .
 
 # Compiles the code into an executable file named worker
 RUN CGO_ENABLED=0 GOOS=linux go build -o worker .
