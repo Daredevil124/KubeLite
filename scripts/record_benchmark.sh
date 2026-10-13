@@ -52,7 +52,13 @@ wait_for_metrics
 
 TIMESTAMP=$(date +"%Y-%m-%d_%H-%M-%S")
 RUN_DIR="$ROOT_DIR/tests/$FORMULA_NAME/run_$TIMESTAMP"
-mkdir -p "$RUN_DIR"
+if ! mkdir -p "$RUN_DIR" 2>/dev/null; then
+    echo "❌ Error: Could not create benchmark run directory: $RUN_DIR"
+    echo "   This usually happens on Linux if 'tests/' was created by root or Docker."
+    echo "   To fix permissions, run:"
+    echo "     sudo chown -R $USER:$USER \"$ROOT_DIR/tests\""
+    exit 1
+fi
 
 CSV_FILE="$RUN_DIR/metrics_log.csv"
 FORMULA_FILE="$RUN_DIR/formula_definition.txt"
@@ -94,7 +100,19 @@ echo " Metrics  : $METRICS_URL"
 echo "================================================================================"
 
 # Initialize CSV header
-echo "timestamp_sec,cpu_percent,memory_percent,queue_length,worker_count,total_requests,total_tasks,rps,tps" > "$CSV_FILE"
+if ! echo "timestamp_sec,cpu_percent,memory_percent,queue_length,worker_count,total_requests,total_tasks,rps,tps" > "$CSV_FILE" 2>/dev/null; then
+    echo "❌ Error: Could not initialize metrics CSV file at: $CSV_FILE"
+    echo "   Please check write permissions for: $RUN_DIR"
+    exit 1
+fi
+
+# Pre-flight check: ensure Master node is reachable
+if ! curl -s --max-time 3 http://localhost:8080/metrics >/dev/null 2>&1; then
+    echo "⚠️  WARNING: Master API (http://localhost:8080/metrics) is not responding!"
+    echo "   Please make sure KubeLite is running in another terminal via:"
+    echo "     ./scripts/start_kubelite.sh"
+    echo "--------------------------------------------------------------------------------"
+fi
 
 # Background Poller: queries Master /metrics every 2 seconds and appends to CSV
 poll_metrics() {
