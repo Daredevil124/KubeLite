@@ -10,22 +10,49 @@ else
     MASTER_MODE="docker"
 fi
 
+if ! command -v npm >/dev/null 2>&1; then
+    for node_dir in "$HOME/.cache/JetBrains"/*/acp-agents/.runtimes/node/*/bin "$HOME/.nvm/versions/node"/*/bin; do
+        if [ -x "$node_dir/npm" ]; then
+            export PATH="$node_dir:$PATH"
+            break
+        fi
+    done
+fi
+
 echo "=========================================================="
 echo "           ⚡ Starting KubeLite System ⚡                  "
 echo "=========================================================="
 
 echo "[1/4] Ensuring Redis is running on localhost:6379..."
+
+
 if [ "$MASTER_MODE" = "host" ]; then
-    if docker port kubelite-redis 8080 >/dev/null 2>&1; then
-        echo "Recreating kubelite-redis without host :8080 so the local Master can bind that port..."
-        docker rm -f kubelite-redis 2>/dev/null || true
-    fi
-    if [ -z "$(docker ps -q -f name=^/kubelite-redis$ 2>/dev/null)" ]; then
-        echo "Creating and running new kubelite-redis container with port mapping (-p 6379:6379)..."
-        docker rm -f kubelite-redis 2>/dev/null || true
-        docker run -d --name kubelite-redis -p 6379:6379 redis:alpine
+
+    # if docker port kubelite-redis 8080 >/dev/null 2>&1; then
+    #     echo "Recreating kubelite-redis without host :8080 so the local Master can bind that port..."
+    #     docker rm -f kubelite-redis 2>/dev/null || true
+    # fi
+    # if [ -z "$(docker ps -q -f name=^/kubelite-redis$ 2>/dev/null)" ]; then
+    #     echo "Creating and running new kubelite-redis container with port mapping (-p 6379:6379)..."
+    #     docker rm -f kubelite-redis 2>/dev/null || true
+    #     docker run -d --name kubelite-redis -p 6379:6379 redis:alpine
+
+    if redis-cli ping >/dev/null 2>&1; then
+        echo "Redis is already running on localhost:6379."
+        redis-cli CONFIG SET protected-mode no >/dev/null 2>&1 || true
+        redis-cli CONFIG SET bind "0.0.0.0" >/dev/null 2>&1 || true
     else
-        echo "kubelite-redis is already running."
+        if docker port kubelite-redis 8080 >/dev/null 2>&1; then
+            echo "Recreating kubelite-redis without host :8080 so the local Master can bind that port..."
+            docker rm -f kubelite-redis 2>/dev/null || true
+        fi
+        if [ -z "$(docker ps -q -f name=^/kubelite-redis$ 2>/dev/null)" ]; then
+            echo "Creating and running new kubelite-redis container with port mapping (-p 6379:6379)..."
+            docker rm -f kubelite-redis 2>/dev/null || true
+            docker run -d --name kubelite-redis -p 6379:6379 redis:alpine
+        else
+            echo "kubelite-redis is already running."
+        fi
     fi
 else
     echo "Docker Master mode: Redis container also publishes host :8080 for the shared Master network namespace."
