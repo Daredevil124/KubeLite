@@ -1,0 +1,24 @@
+================================================================================
+KubeLite Autoscaling Formula Benchmark Definition
+Evaluated in: Master/orchestrator/orchestrator.go -> CalculateDesiredContainers()
+================================================================================
+
+1. Resource Demand (CPU & Memory):
+   cpuRatio       = cpuUsage / 70.0
+   memRatio       = memoryUsage / 75.0
+   resourceDemand = noOfWorkers * max(cpuRatio, memRatio)
+
+2. Traffic Demand (Queue Backlog & Net Velocity):
+   trafficDemand  = (queueLength / 5.0)
+   if rps > tps:
+       trafficDemand += (rps - tps) / 2.0
+
+3. Desired Workers (x):
+   x = max(minWorkers, ceil(max(resourceDemand, trafficDemand)))
+
+4. Final System Target (Bounded by Host Safety Ceiling):
+   Target = min(x, min(y, z))
+   where:
+     y = floor((Host_CPUs * 0.8) / 0.5)
+     z = floor((Host_RAM_MB * 0.8) / 256.0)
+================================================================================

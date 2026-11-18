@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" width="1000" height="520" style="background:#0c0a09; font-family:'Inter',system-ui,sans-serif;">
+  <style>
+    .grid { stroke: #201d1a; stroke-width: 1; }
+    .title { font-size: 15px; font-weight: 700; fill: #fafaf9; letter-spacing: 0.5px; }
+    .sub { font-size: 11px; fill: #a8a29e; font-family: monospace; }
+    .axis { font-size: 11px; fill: #78716c; font-family: monospace; }
+    .box { fill: #141210; stroke: #3d3832; stroke-width: 1; rx: 6px; }
+  </style>
+
+  <!-- Header Box -->
+  <rect x="25" y="15" width="950" height="85" class="box" />
+  <text x="40" y="38" class="title">TRAFFIC VELOCITY: CLIENT RPS vs TASK COMPLETION TPS</text>
+  <text x="40" y="58" class="sub">Evaluates ingress rate (RPS) vs cluster processing capacity (TPS)</text>
+  <line x1="100" y1="88" x2="120" y2="88" stroke="#f59e0b" stroke-width="2.0" stroke-dasharray="4,4" /><text x="128" y="92" class="axis" fill="#fafaf9">Incoming Client RPS</text><line x1="312" y1="88" x2="332" y2="88" stroke="#10b981" stroke-width="2.5" /><text x="340" y="92" class="axis" fill="#fafaf9">Completed Tasks TPS</text>
+
+  <!-- Plot Background -->
+  <rect x="90" y="110" width="830" height="340" fill="#141210" stroke="#27231f" />
+
+  <!-- Grid & Axes -->
+  <line x1="90" y1="450.0" x2="920" y2="450.0" class="grid" /><line x1="90" y1="365.0" x2="920" y2="365.0" class="grid" /><line x1="90" y1="280.0" x2="920" y2="280.0" class="grid" /><line x1="90" y1="195.0" x2="920" y2="195.0" class="grid" /><line x1="90" y1="110.0" x2="920" y2="110.0" class="grid" /><line x1="90.0" y1="110" x2="90.0" y2="450" class="grid" /><line x1="297.5" y1="110" x2="297.5" y2="450" class="grid" /><line x1="505.0" y1="110" x2="505.0" y2="450" class="grid" /><line x1="712.5" y1="110" x2="712.5" y2="450" class="grid" /><line x1="920.0" y1="110" x2="920.0" y2="450" class="grid" />
+  <text x="78" y="454.0" class="axis" text-anchor="end">0.0 req/s</text><text x="78" y="369.0" class="axis" text-anchor="end">2.2 req/s</text><text x="78" y="284.0" class="axis" text-anchor="end">4.5 req/s</text><text x="78" y="199.0" class="axis" text-anchor="end">6.8 req/s</text><text x="78" y="114.0" class="axis" text-anchor="end">9.0 req/s</text>
+  <text x="90.0" y="490" class="axis" text-anchor="start">0.0s</text><text x="297.5" y="490" class="axis" text-anchor="middle">10.5s</text><text x="505.0" y="490" class="axis" text-anchor="middle">21.0s</text><text x="712.5" y="490" class="axis" text-anchor="middle">31.5s</text><text x="920.0" y="490" class="axis" text-anchor="end">42.0s</text>
+  <text x="505.0" y="508" class="axis" text-anchor="middle">Elapsed Time (seconds)</text>
+
+  <!-- Reference Lines -->
+  
+
+  <!-- Data Polyline -->
+  <polyline fill="none" stroke="#f59e0b" stroke-width="2.0" stroke-dasharray="4,4" points="90.0,280.0 129.5,185.6 169.0,166.7 208.6,317.8 248.1,336.7 287.6,317.8 346.9,362.0 386.4,261.1 426.0,242.2 465.5,336.7 505.0,242.2 544.5,336.7 584.0,166.7 623.6,223.3 663.1,336.7 702.6,223.3 742.1,336.7 781.7,298.9 821.2,280.0 880.5,362.0 920.0,298.9" /><polyline fill="none" stroke="#10b981" stroke-width="2.5" points="90.0,450.0 129.5,450.0 169.0,450.0 208.6,374.4 248.1,412.2 287.6,412.2 346.9,362.0 386.4,431.1 426.0,393.3 465.5,393.3 505.0,450.0 544.5,298.9 584.0,393.3 623.6,412.2 663.1,412.2 702.6,393.3 742.1,431.1 781.7,374.4 821.2,412.2 880.5,424.7 920.0,374.4" />
+</svg>

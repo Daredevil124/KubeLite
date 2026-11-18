@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 520" width="1000" height="520" style="background:#0c0a09; font-family:'Inter',system-ui,sans-serif;">
+  <style>
+    .grid { stroke: #201d1a; stroke-width: 1; }
+    .title { font-size: 15px; font-weight: 700; fill: #fafaf9; letter-spacing: 0.5px; }
+    .sub { font-size: 11px; fill: #a8a29e; font-family: monospace; }
+    .axis { font-size: 11px; fill: #78716c; font-family: monospace; }
+    .box { fill: #141210; stroke: #3d3832; stroke-width: 1; rx: 6px; }
+  </style>
+
+  <!-- Header Box -->
+  <rect x="25" y="15" width="950" height="85" class="box" />
+  <text x="40" y="38" class="title">AUTOSCALER REPLICA MANAGEMENT: ACTIVE WORKERS</text>
+  <text x="40" y="58" class="sub">Docker worker containers spawned with label &#x27;role=worker&#x27;</text>
+  <line x1="100" y1="88" x2="120" y2="88" stroke="#22c55e" stroke-width="3.0" /><text x="128" y="92" class="axis" fill="#fafaf9">Active Worker Replicas</text>
+
+  <!-- Plot Background -->
+  <rect x="90" y="110" width="830" height="340" fill="#141210" stroke="#27231f" />
+
+  <!-- Grid & Axes -->
+  <line x1="90" y1="450.0" x2="920" y2="450.0" class="grid" /><line x1="90" y1="365.0" x2="920" y2="365.0" class="grid" /><line x1="90" y1="280.0" x2="920" y2="280.0" class="grid" /><line x1="90" y1="195.0" x2="920" y2="195.0" class="grid" /><line x1="90" y1="110.0" x2="920" y2="110.0" class="grid" /><line x1="90.0" y1="110" x2="90.0" y2="450" class="grid" /><line x1="297.5" y1="110" x2="297.5" y2="450" class="grid" /><line x1="505.0" y1="110" x2="505.0" y2="450" class="grid" /><line x1="712.5" y1="110" x2="712.5" y2="450" class="grid" /><line x1="920.0" y1="110" x2="920.0" y2="450" class="grid" />
+  <text x="78" y="454.0" class="axis" text-anchor="end">0.0 workers</text><text x="78" y="369.0" class="axis" text-anchor="end">2.8 workers</text><text x="78" y="284.0" class="axis" text-anchor="end">5.5 workers</text><text x="78" y="199.0" class="axis" text-anchor="end">8.2 workers</text><text x="78" y="114.0" class="axis" text-anchor="end">11.0 workers</text>
+  <text x="90.0" y="490" class="axis" text-anchor="start">0.0s</text><text x="297.5" y="490" class="axis" text-anchor="middle">10.5s</text><text x="505.0" y="490" class="axis" text-anchor="middle">21.0s</text><text x="712.5" y="490" class="axis" text-anchor="middle">31.5s</text><text x="920.0" y="490" class="axis" text-anchor="end">42.0s</text>
+  <text x="505.0" y="508" class="axis" text-anchor="middle">Elapsed Time (seconds)</text>
+
+  <!-- Reference Lines -->
+  
+
+  <!-- Data Polyline -->
+  <polyline fill="none" stroke="#22c55e" stroke-width="3.0" points="90.0,419.1 129.5,419.1 169.0,419.1 208.6,171.8 248.1,171.8 287.6,171.8 346.9,171.8 386.4,171.8 426.0,171.8 465.5,171.8 505.0,171.8 544.5,171.8 584.0,171.8 623.6,171.8 663.1,171.8 702.6,171.8 742.1,171.8 781.7,171.8 821.2,171.8 880.5,171.8 920.0,171.8" />
+</svg>
