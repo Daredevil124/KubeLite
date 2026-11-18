@@ -67,6 +67,8 @@ func StartPolling(ctx context.Context, isShuttingDown *atomic.Bool) {
 			continue
 		}
 
+		task.Normalize()
+
 		switch task.Type {
 		case "prime":
 			res := tasks.FindNthPrime(task.Value)

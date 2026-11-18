@@ -26,6 +26,15 @@ func Orchestrate() {
 	var tps float64
 	oldRequest := 0
 	oldTask := 0
+
+	// Scale-down hysteresis: prevents container churn/flapping during temporary load drops
+	var scaleDownCandidateSince time.Time
+	scaleDownCooldown := 30 * time.Second
+	if rawCooldown := os.Getenv("KUBELITE_SCALE_DOWN_COOLDOWN_SEC"); rawCooldown != "" {
+		if sec, err := strconv.Atoi(rawCooldown); err == nil && sec >= 0 {
+			scaleDownCooldown = time.Duration(sec) * time.Second
+		}
+	}
 	for { //infinite loop
 		//thread goes to sleep if there is nothing in the channel
 		<-ticker.C //thread is woken up if something is pushed into ticker.C and ticker.C runs a pop function (<- means pop())
@@ -76,13 +85,44 @@ func Orchestrate() {
 			cpuUsage, memoryUsage, queueLength, rps, tps, x, noOfContainer)
 
 		if len(currentWorkers) <= int(noOfContainer) {
+			// System is scaling up or maintaining current capacity.
+			if !scaleDownCandidateSince.IsZero() {
+				log.Printf("Scale-down cooldown canceled: load or target increased (workers: %d, target: %d)",
+					len(currentWorkers), noOfContainer)
+				scaleDownCandidateSince = time.Time{}
+			}
 			reqContainers := int(noOfContainer) - len(currentWorkers)
-			Generate(int64(reqContainers))
+			if reqContainers > 0 {
+				Generate(int64(reqContainers))
+			}
+			metrics.UpdateClusterMetrics(cpuUsage, memoryUsage, int(noOfContainer))
 		} else {
-			reqContianers := len(currentWorkers) - int(noOfContainer)
-			Destroy(int64(reqContianers))
+			// System wants to scale down (currentWorkers > noOfContainer)
+			reqContainers := len(currentWorkers) - int(noOfContainer)
+			if scaleDownCooldown == 0 {
+				// Immediate scale-down when cooldown is disabled
+				Destroy(int64(reqContainers))
+				metrics.UpdateClusterMetrics(cpuUsage, memoryUsage, int(noOfContainer))
+			} else if scaleDownCandidateSince.IsZero() {
+				// First cycle detecting lower load: start the cooldown window
+				scaleDownCandidateSince = time.Now()
+				log.Printf("Scale-down condition detected (current: %d, target: %d). Starting cooldown window (%v)...",
+					len(currentWorkers), noOfContainer, scaleDownCooldown)
+				metrics.UpdateClusterMetrics(cpuUsage, memoryUsage, len(currentWorkers))
+			} else if time.Since(scaleDownCandidateSince) >= scaleDownCooldown {
+				// Cooldown window satisfied without interruption: safely execute scale down
+				log.Printf("Scale-down cooldown elapsed (%v). Safely destroying %d worker container(s)...",
+					scaleDownCooldown, reqContainers)
+				Destroy(int64(reqContainers))
+				scaleDownCandidateSince = time.Time{}
+				metrics.UpdateClusterMetrics(cpuUsage, memoryUsage, int(noOfContainer))
+			} else {
+				remaining := scaleDownCooldown - time.Since(scaleDownCandidateSince)
+				log.Printf("Scale-down deferred by cooldown window: holding %d workers for another %.1fs to prevent flapping (target: %d)",
+					len(currentWorkers), remaining.Seconds(), noOfContainer)
+				metrics.UpdateClusterMetrics(cpuUsage, memoryUsage, len(currentWorkers))
+			}
 		}
-		metrics.UpdateClusterMetrics(cpuUsage, memoryUsage, int(noOfContainer))
 		cli.Close()
 
 	}
