@@ -7,6 +7,8 @@ import (
 	"net/http"
 )
 
+// what happens when a user submits a task to KubeLite.
+
 func Request(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS")
@@ -16,7 +18,7 @@ func Request(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
-	data.IncrementRequestCount()
+	data.IncrementRequestCount() // basically request++
 	ctx := context.Background()
 	body, err := io.ReadAll(r.Body) //pulls all the data from r.Body and into body
 	if err != nil {

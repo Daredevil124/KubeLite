@@ -9,7 +9,7 @@ import (
 )
 
 func main() {
-	data.InitRedis()
+	data.InitRedis() // intialise redis queue
 	go orchestrator.Orchestrate() // background: collect metrics every 10s
 
 	http.HandleFunc("/evaluate", controller.Request)    // POST — evaluate workload (Architecture spec)

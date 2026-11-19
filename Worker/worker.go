@@ -9,6 +9,16 @@ import (
 	"sync/atomic"
 )
 
+// The main responsibility of this file is to continuously:
+// 1. Wait for a task in Redis.
+// 2. Retrieve the task.
+// 3. Register it as being processed.
+// 4. Identify what kind of computation is requested.
+// 5. Execute the appropriate function.
+// 6. Update completion metrics.
+// 7. Remove the task from the processing queue.
+
+
 // StartPolling runs the infinite loop pulling tasks from Redis.
 func StartPolling(ctx context.Context, isShuttingDown *atomic.Bool) {
 	for {
