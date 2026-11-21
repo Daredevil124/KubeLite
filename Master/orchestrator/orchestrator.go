@@ -131,12 +131,15 @@ func Orchestrate() {
 func getSystemCaps() (y int64, z int64) {
 	cpus := float64(runtime.NumCPU())         //extracts host's total number of CPU cores
 	y = int64(math.Floor((cpus * 0.8) / 0.5)) // at maxt this code uses 80% of total cpus
+	y = max(1, y)
+
 	totalMem := getHostMemoryMB()
 	if totalMem <= 0 {
 		z = y
 		return y, z
 	}
 	z = int64(math.Floor((totalMem * 0.8) / 256.0))
+	z = max(1, z)
 	return y, z
 }
 

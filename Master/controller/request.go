@@ -2,6 +2,7 @@ package controller
 
 import (
 	"KubeLite/data"
+	"bytes"
 	"context"
 	"io"
 	"net/http"
@@ -18,14 +19,30 @@ func Request(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		return
 	}
-	data.IncrementRequestCount() // basically request++
-	ctx := context.Background()
+
+	if r.Method != http.MethodPost {
+		http.Error(w, `{"error":"Method not allowed, use POST"}`, http.StatusMethodNotAllowed)
+		return
+	}
+
+	defer r.Body.Close()
+
 	body, err := io.ReadAll(r.Body) //pulls all the data from r.Body and into body
 	if err != nil {
 		http.Error(w, "Failed to read the body", http.StatusBadRequest)
 		return
 	}
-	err = data.RedisClient.RPush(ctx, "task_queue", string(body)).Err() //pushes at the end/right. ListName=task_queue and return error if it occurs
+
+	trimmedBody := bytes.TrimSpace(body)
+	if len(trimmedBody) == 0 {
+		http.Error(w, `{"error":"Payload cannot be empty"}`, http.StatusBadRequest)
+		return
+	}
+
+	data.IncrementRequestCount() // basically request++
+
+	ctx := context.Background()
+	err = data.RedisClient.RPush(ctx, "task_queue", string(trimmedBody)).Err() //pushes at the end/right. ListName=task_queue and return error if it occurs
 	if err != nil {
 		http.Error(w, "Failed to push to the queue", http.StatusInternalServerError)
 		return
