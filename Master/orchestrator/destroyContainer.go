@@ -76,6 +76,17 @@ func Destroy(noOfContainer int64) {
 		}
 	}
 
+	// Grace period for low-CPU/idle workers. Avoid timeout: 0 because Docker sends an
+	// immediate SIGKILL instead of SIGTERM when timeout is 0. A 3-second grace period
+	// ensures Docker sends SIGTERM, allowing Worker/main.go to catch it and finish or
+	// cleanly exit.
+	defaultIdleTimeout := 3
+	if raw := os.Getenv("KUBELITE_IDLE_STOP_TIMEOUT_SEC"); raw != "" {
+		if sec, err := strconv.Atoi(raw); err == nil && sec > 0 {
+			defaultIdleTimeout = sec
+		}
+	}
+
 	var wg sync.WaitGroup
 	for _, target := range toDestroy {
 		wg.Add(1)
@@ -84,7 +95,7 @@ func Destroy(noOfContainer int64) {
 
 			timeout := defaultBusyTimeout
 			if t.isIdle {
-				timeout = 2 // 2-second grace period for idle workers to handle SIGTERM cleanly
+				timeout = defaultIdleTimeout
 			}
 
 			stopCtx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout+5)*time.Second)

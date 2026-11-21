@@ -69,7 +69,11 @@ func StartPolling(ctx context.Context, isShuttingDown *atomic.Bool) {
 		err = json.Unmarshal([]byte(rawPayload), &task)
 		if err != nil {
 			fmt.Printf("Corrupted JSON payload received from queue: %v. Removing from processing_queue and skipping.\n", err)
-			rdb.LRem(cleanupCtx, "processing_queue", 1, wrappedPayload)
+			if removed, remErr := rdb.LRem(cleanupCtx, "processing_queue", 1, wrappedPayload).Result(); remErr != nil {
+				fmt.Printf("Error removing corrupted task from processing_queue: %v\n", remErr)
+			} else if removed == 0 {
+				rdb.LRem(cleanupCtx, "temp_queue", 1, wrappedPayload)
+			}
 			if isShuttingDown.Load() {
 				fmt.Println("Worker: shutdown complete — exiting.")
 				os.Exit(0)
@@ -98,7 +102,12 @@ func StartPolling(ctx context.Context, isShuttingDown *atomic.Bool) {
 		}
 
 		// 5. Cleanup: Remove the WRAPPED payload from processing_queue
-		rdb.LRem(cleanupCtx, "processing_queue", 1, wrappedPayload)
+		if removed, err := rdb.LRem(cleanupCtx, "processing_queue", 1, wrappedPayload).Result(); err != nil {
+			fmt.Printf("Error removing task from processing_queue: %v\n", err)
+		} else if removed == 0 {
+			// Fallback: check if the task was temporarily in temp_queue (legacy master compatibility)
+			rdb.LRem(cleanupCtx, "temp_queue", 1, wrappedPayload)
+		}
 
 		// If SIGTERM was received during task processing, exit cleanly now after cleanup.
 		if isShuttingDown.Load() {
