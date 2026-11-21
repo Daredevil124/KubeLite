@@ -180,8 +180,11 @@ cleanup() {
     echo ""
     echo "================================================================================"
     echo " Finishing benchmark session... Processing charts..."
+    if [ -n "$WORKLOAD_PID" ]; then
+        kill $WORKLOAD_PID 2>/dev/null || true
+    fi
     kill $POLLER_PID 2>/dev/null || true
-    docker stop kubelite-workload 2>/dev/null || true
+    docker rm -f kubelite-workload 2>/dev/null || true
 
     local sample_count=0
     if [ -f "$CSV_FILE" ]; then
@@ -232,18 +235,24 @@ echo "Starting workload generator: $LOAD_SCRIPT"
 echo "Press [CTRL+C] when you want to finish the test and generate all charts."
 echo "--------------------------------------------------------------------------------"
 
-# Run the selected Go load test workload (native Go or via Docker)
+# Run the selected Go load test workload (native Go or via Docker) in background
 if command -v go >/dev/null 2>&1; then
-    go run "$LOAD_SCRIPT" "${WORKLOAD_ARGS[@]}" || true
+    go run "$LOAD_SCRIPT" "${WORKLOAD_ARGS[@]}" &
+    WORKLOAD_PID=$!
 else
     echo "Go not found on host. Running workload generator via Docker (golang:alpine)..."
     REL_SCRIPT="${LOAD_SCRIPT#$ROOT_DIR/}"
     docker rm -f kubelite-workload 2>/dev/null || true
     docker run --rm --name kubelite-workload \
+        --init \
         -v "$ROOT_DIR":/app \
         -v "$HOME/go/pkg/mod":/go/pkg/mod \
         -w /app \
         --network container:kubelite-redis \
-        golang:alpine go run "$REL_SCRIPT" "${WORKLOAD_ARGS[@]}" || true
+        golang:alpine go run "$REL_SCRIPT" "${WORKLOAD_ARGS[@]}" &
+    WORKLOAD_PID=$!
 fi
+
+# Wait for workload to finish or until Ctrl+C is pressed
+wait $WORKLOAD_PID 2>/dev/null || true
 cleanup
