@@ -44,3 +44,21 @@ WHAT WAS DONE:
    session are cleanly pruned alongside Master and Frontend services.
 
 ================================================================================
+
+
+
+Task 10: Large Compiled Binaries Tracked in Git
+Problem:
+Master/KubeLite (12.9 MB) and Worker/Worker (9.3 MB) were committed and tracked in Git.
+.gitignore had an entry for Master/Master instead of Master/KubeLite.
+Missing Worker/.dockerignore meant COPY . . in Dockerfile was sending the 9.3 MB host binary into the Docker build context.
+
+
+Task 11: Lingering Worker Containers on Script Stop
+Problem:
+In scripts/start_kubelite.sh, pressing Ctrl+C stopped Master and Frontend, but left dynamically spawned worker containers (role=worker) running as orphans in Docker.
+Changes:
+Updated cleanup() in scripts/start_kubelite.sh to automatically prune all worker containers upon shutdown:
+bash
+docker rm -f $(docker ps -q -f label=role=worker) 2>/dev/null || true
+
