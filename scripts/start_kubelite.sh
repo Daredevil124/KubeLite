@@ -128,6 +128,8 @@ cleanup() {
     echo "Shutting down KubeLite services..."
     kill $MASTER_PID $FRONTEND_PID 2>/dev/null || true
     docker stop kubelite-master 2>/dev/null || true
+    echo "Cleaning up worker containers..."
+    docker rm -f $(docker ps -q -f label=role=worker) 2>/dev/null || true
     echo "Clean shutdown complete."
     exit 0
 }

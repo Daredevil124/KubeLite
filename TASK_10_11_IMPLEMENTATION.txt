@@ -1,0 +1,46 @@
+================================================================================
+KUBELITE TASKS 10 & 11 IMPLEMENTATION SUMMARY
+================================================================================
+
+--------------------------------------------------------------------------------
+TASK 10: Large Compiled Binaries Tracked in Git
+--------------------------------------------------------------------------------
+ISSUE:
+- Both compiled Go binaries (Master/KubeLite at ~12.9 MB and Worker/Worker at
+  ~9.3 MB) were previously committed and tracked in git.
+- .gitignore had a mismatch/typo: it listed "Master/Master", but the actual
+  binary name produced by Go was "Master/KubeLite".
+- Worker/.dockerignore did not exist, causing Docker to copy the 9.3 MB host
+  binary directly into the Docker build context during "COPY . .".
+
+WHAT WAS DONE:
+1. Updated .gitignore to explicitly ignore:
+   - Master/KubeLite
+   - Worker/Worker
+   - Worker/worker
+2. Untracked both binaries from git index using:
+   git rm --cached Master/KubeLite Worker/Worker
+   (Keeps local binary files intact while preventing them from bloating git commits).
+3. Created Worker/.dockerignore to prevent local binaries (Worker, worker,
+   *.test, *.out) and OS metadata (.DS_Store) from being sent to the Docker
+   build daemon context.
+
+--------------------------------------------------------------------------------
+TASK 11: Lingering Worker Containers on Script Stop
+--------------------------------------------------------------------------------
+ISSUE:
+- In scripts/start_kubelite.sh, when the cluster was stopped with Ctrl+C,
+  cleanup() killed the Master process and Frontend dev server, but failed to
+  terminate any worker containers (labeled role=worker) dynamically spawned
+  by the orchestrator in Docker.
+- These orphaned containers remained running indefinitely, consuming system
+  resources and memory.
+
+WHAT WAS DONE:
+1. Updated the cleanup() function in scripts/start_kubelite.sh to automatically
+   find and terminate all active worker containers upon cluster shutdown:
+   docker rm -f $(docker ps -q -f label=role=worker) 2>/dev/null || true
+2. Now, on SIGINT (Ctrl+C) or SIGTERM, all worker containers spawned during the
+   session are cleanly pruned alongside Master and Frontend services.
+
+================================================================================

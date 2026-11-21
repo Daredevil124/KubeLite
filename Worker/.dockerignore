@@ -1,0 +1,12 @@
+# Binaries and executables
+Worker
+worker
+*.exe
+*.test
+*.out
+
+# System and editor files
+.DS_Store
+.git
+.vscode
+.idea
